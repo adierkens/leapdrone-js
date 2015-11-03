@@ -1,0 +1,33 @@
+{
+  "name": "leap-drone",
+  "version": "0.0.1",
+  "description": "A node/javascript version of leapdrone",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha ./tests/**/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adierkens/leapdronejs.git"
+  },
+  "keywords": [
+    "leap",
+    "motion",
+    "leapmotion",
+    "drone",
+    "quadcopter"
+  ],
+  "author": "Adam Dierkens <adam@dierkens.com> (adamdierkens.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/adierkens/leapdronejs/issues"
+  },
+  "homepage": "https://github.com/adierkens/leapdronejs#readme",
+  "dependencies": {
+    "leapjs": "^0.6.4"
+  },
+  "devDependencies": {
+    "chai": "^3.4.0",
+    "mocha": "^2.3.3"
+  }
+}
