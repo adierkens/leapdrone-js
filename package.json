@@ -4,6 +4,7 @@
   "description": "A node/javascript version of leapdrone",
   "main": "index.js",
   "scripts": {
+    "start": "node server.js",
     "test": "mocha ./tests/**/*.js"
   },
   "repository": {
@@ -24,7 +25,8 @@
   },
   "homepage": "https://github.com/adierkens/leapdronejs#readme",
   "dependencies": {
-    "leapjs": "^0.6.4"
+    "leapjs": "^0.6.4",
+    "lodash": "^3.10.1"
   },
   "devDependencies": {
     "chai": "^3.4.0",
