@@ -1,4 +1,8 @@
 'use strict';
+var _ = require('lodash');
+var Leap = require('leapjs');
+
+var fistThreshold = .2;
 
 function calculateRoll(hand) {
     var avgDeltaX = 0;
@@ -7,7 +11,7 @@ function calculateRoll(hand) {
     var lastFinger;
     
     hand.fingers.forEach(function(finger) {
-        if (finger.type == 0 || finger.type == 4) {
+        if (finger.type === 0 || finger.type === 4) {
             return;
         }
 
@@ -34,7 +38,7 @@ function calculatePitch(hand) {
     var avgAngle = 0;
 
     hand.fingers.forEach(function(finger) {
-        if (finger.type == 0 || finger.type == 4) {
+        if (finger.type === 0 || finger.type === 4) {
             return;
         }
 
@@ -46,12 +50,29 @@ function calculatePitch(hand) {
     return -avgAngle / hand.fingers.length;
 }
 
-function calculateYaw(hand) {
+function calculateYaw() {
     return 0;
+}
+
+function isFist(hand) {
+    var totalLength = 0;
+    var palmPosition = hand.palmPosition;
+
+    _.each(hand.fingers, function(finger) {
+        if (finger.extended) {
+            return false;
+        }
+
+        var fingerPos = finger.dipPosition;
+        totalLength += Leap.vec3.dist(palmPosition, fingerPos);
+    });
+
+    return (totalLength/10.0) > fistThreshold;
 }
 
 module.exports = {
     roll: calculateRoll,
     pitch: calculatePitch,
-    yaw: calculateYaw
+    yaw: calculateYaw,
+    isFist: isFist
 };
