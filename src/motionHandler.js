@@ -52,7 +52,7 @@ class ControlSignalStateMachine {
                 this._controlSet = false;
                 console.log('control timed-out');
             }   
-        }   
+        }
         return this._controlSet;
     }
 
