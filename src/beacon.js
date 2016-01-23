@@ -2,14 +2,16 @@
 var _ = require('lodash');
 var WebSocketServer = require('websocket').server;
 var http = require('http');
+var fs = require('fs');
 
 var server = http.createServer(function(request, response) {
-    response.writeHead(404);
+    response.writeHead(500, {"Content-Type": "text/plain"});
+    response.write(err + "\n");
     response.end();
 });
 
 server.listen(8080, function() {
-    console.log('Server is listening on port 8080');
+    console.log('Beaconing Server is listening on port 8080');
 });
 
 var wsServer = new WebSocketServer({

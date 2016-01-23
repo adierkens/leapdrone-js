@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/adierkens/leapdronejs#readme",
   "dependencies": {
+    "express": "^4.13.4",
     "leapjs": "^0.6.4",
     "lodash": "^3.10.1",
     "moment": "^2.10.6",

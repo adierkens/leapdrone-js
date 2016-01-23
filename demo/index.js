@@ -1,0 +1,141 @@
+/**
+ * Created by Adam on 1/23/16.
+ */
+
+var config = {
+    webSocetLocation: 'ws://localhost:8080',
+    stlLocation: 'micro_quad.stl'
+};
+
+var currentPosition = {
+    roll: 0,
+    pitch: 0,
+    yaw: 0
+};
+
+var GoogleChart = {
+    NUM_DATA_POINTS: 500,
+    options: {
+        title: 'Leap Motion Visual',
+        width: 900,
+        height: 500,
+        series: {
+            0: {targetAxisIndex: 0},
+            1: {targetAxisIndex: 1}
+        },
+        curveType: 'function'
+    }
+};
+
+var QuadScene = {};
+
+function initGoogleChart() {
+    google.charts.load('current', { 'packages': ['line', 'corechart']});
+    google.charts.setOnLoadCallback(function(){
+
+        var chartDiv = document.getElementById('motion_chart');
+        var dataTable = new google.visualization.DataTable();
+        dataTable.addColumn('datetime', 'Time');
+        dataTable.addColumn('number', 'roll');
+        dataTable.addColumn('number', 'pitch');
+        dataTable.addColumn('number', 'yaw');
+        dataTable.addRow([new Date(), 0, 0, 0]);
+
+        GoogleChart.dataTable = dataTable;
+
+        var materialChart = new google.charts.Line(chartDiv);
+        materialChart.draw(dataTable, GoogleChart.options);
+
+        GoogleChart.graph = materialChart;
+
+        GoogleChart.draw  = _.debounce(function() {
+            var dataView = new google.visualization.DataView(GoogleChart.dataTable);
+
+            var rows = dataView.getNumberOfRows();
+            if (rows > GoogleChart.NUM_DATA_POINTS) {
+                dataView.setRows(rows - GoogleChart.NUM_DATA_POINTS, rows-1);
+            }
+
+            GoogleChart.graph.draw(dataView, GoogleChart.options);
+        });
+    });
+};
+
+function updateChart() {
+    if (GoogleChart.dataTable) {
+        GoogleChart.dataTable.addRow([new Date(), currentPosition.roll, currentPosition.pitch, currentPosition.yaw]);
+        GoogleChart.draw();
+    }
+}
+
+function onMessage(event) {
+    var eventData = JSON.parse(event.data);
+    console.log(eventData);
+    if (eventData.event == 'position') {
+        currentPosition = eventData.data;
+        updateChart();
+    }
+}
+
+function initWebSocket() {
+    var websocket = new WebSocket(config.webSocetLocation);
+    websocket.onmessage = onMessage;
+};
+
+function init3DModel() {
+    var renderer = new THREE.WebGLRenderer( { antialias: true } );
+    renderer.setSize(900, 500);
+    QuadScene.renderer = renderer;
+    document.getElementById('quad_scene').appendChild(renderer.domElement);
+
+    var scene = new THREE.Scene();
+    QuadScene.scene = scene;
+    var camera = new THREE.PerspectiveCamera(35, 900/500, 1, 10000);
+    QuadScene.camera = camera;
+    camera.position.set(0, -300, 0);
+    camera.updateProjectionMatrix();
+    scene.add(camera);
+
+    scene.add(new THREE.AmbientLight(0x222222));
+    var light = new THREE.PointLight(0xffffff, 0.8);
+    camera.add(light);
+
+    loadSTL();
+
+    function render() {
+        if (QuadScene.mesh) {
+            QuadScene.mesh.rotation.x = currentPosition.pitch;
+            QuadScene.mesh.rotation.y = Math.PI/2 + currentPosition.roll;
+            QuadScene.camera.lookAt(QuadScene.scene.position);
+            QuadScene.renderer.render(QuadScene.scene, QuadScene.camera);
+        }
+    }
+
+    function animate() {
+        requestAnimationFrame(animate);
+        render();
+    }
+
+    animate();
+};
+
+function loadSTL() {
+    var loader = new THREE.STLLoader();
+    loader.load(config.stlLocation, function(geometry) {
+        var material = new THREE.MeshPhongMaterial( {color: 0xff5533} );
+        var mesh = new THREE.Mesh(geometry, material);
+        mesh.rotation.y = Math.PI / 2;
+        mesh.rotation.order = "YZX";
+        QuadScene.mesh = mesh;
+        QuadScene.scene.add(mesh);
+    });
+}
+
+function init() {
+    console.log("Initializing");
+    initGoogleChart();
+    initWebSocket();
+    init3DModel();
+}
+
+window.onload = init;
