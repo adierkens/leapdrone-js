@@ -49,14 +49,14 @@ function initGoogleChart() {
         GoogleChart.graph = materialChart;
 
         GoogleChart.draw  = _.debounce(function() {
-            var dataView = new google.visualization.DataView(GoogleChart.dataTable);
 
-            var rows = dataView.getNumberOfRows();
-            if (rows > GoogleChart.NUM_DATA_POINTS) {
-                dataView.setRows(rows - GoogleChart.NUM_DATA_POINTS, rows-1);
+            var numRows = GoogleChart.dataTable.getNumberOfRows();
+
+            if (numRows > GoogleChart.NUM_DATA_POINTS) {
+                GoogleChart.dataTable.removeRows(0, numRows - GoogleChart.NUM_DATA_POINTS - 1);
             }
 
-            GoogleChart.graph.draw(dataView, GoogleChart.options);
+            GoogleChart.graph.draw(GoogleChart.dataTable, GoogleChart.options);
         });
     });
 };
@@ -70,7 +70,6 @@ function updateChart() {
 
 function onMessage(event) {
     var eventData = JSON.parse(event.data);
-    console.log(eventData);
     if (eventData.event == 'position') {
         currentPosition = eventData.data;
         updateChart();

@@ -69,6 +69,22 @@ class ControlSignalStateMachine {
     }
 }
 
+function calculateBankedPosition(hand) {
+    return {
+        roll: helper.roll(hand),
+        pitch: helper.pitch(hand),
+        yaw: helper.yaw(hand)
+    };
+}
+
+function calculateTranslationalPosition(hand) {
+    return {
+        roll: 0,
+        pitch: 0,
+        yaw: 0
+    }
+}
+
 class MotionController {
     constructor(options) {
         if (options.rollingAverageCount == 0) {
@@ -84,6 +100,13 @@ class MotionController {
             this.prevPositions = _.drop(this.prevPositions, this.prevPositions.length - this.options.rollingAverageCount - 1);
         }
         return helper.average(this.prevPositions);
+    }
+
+    calculateNewPosition(hand) {
+        if (this.options.controller === 'banked') {
+            return calculateBankedPosition(hand);
+        }
+        return calculateTranslationalPosition(hand);
     }
 
     onHand(hand, sender) {
@@ -102,21 +125,6 @@ class MotionController {
  
 }
 
-class TranslationalMotionController extends MotionController {
-}
-
-class BankedMotionController extends MotionController {
-    
-    calculateNewPosition(hand) {
-        return {
-            roll: helper.roll(hand),
-            pitch: helper.pitch(hand),
-            yaw: helper.yaw(hand)
-        }; 
-    }
-
-}
-
 module.exports = function(options) {
-    return options.bankedController? new BankedMotionController(options) : new TranslationalMotionController(options);
+    return new MotionController(options);
 };

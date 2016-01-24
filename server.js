@@ -4,7 +4,7 @@ var beacon = require('./src/beacon');
 var express = require('express');
 
 new Leap.Controller().use('leapdrone', { 
-    bankedController: true, 
+    controller: 'banked',
     onNewPosition: function(pos) {
         beacon({
             event: 'position',
@@ -12,7 +12,6 @@ new Leap.Controller().use('leapdrone', {
         });
     }
 }).connect();
-
 
 var app = express();
 app.use(express.static(__dirname + '/demo'));
