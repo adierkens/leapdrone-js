@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/adierkens/leapdrone-js.svg?branch=master)](https://travis-ci.org/adierkens/leapdrone-js)
 # leapdrone
 > A javascript version of the leapdrone project
 
