@@ -2,6 +2,7 @@
 var _ = require('lodash');
 var helper = require('./helpers');
 var moment = require('moment');
+var beacon = require('./beacon');
 
 var defaultMotionOptions = {
     onNewPosition: function(){},
@@ -93,6 +94,9 @@ class MotionController {
         this.options = _.assign(defaultMotionOptions, options);
         this.controlStateMachine = new ControlSignalStateMachine();
         this.prevPositions = [];
+        beacon.register(beacon.events.config, function(data) {
+            this.options.assign(this.options, data.data);
+        });
     }
 
     rollingAverage() {

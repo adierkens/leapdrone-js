@@ -2,7 +2,6 @@
 var _ = require('lodash');
 var WebSocketServer = require('websocket').server;
 var http = require('http');
-var fs = require('fs');
 
 var server = http.createServer(function(request, response) {
     response.writeHead(500, {"Content-Type": "text/plain"});
@@ -21,14 +20,33 @@ var wsServer = new WebSocketServer({
 
 var peerList = [];
 
+const EVENT_NAMES = {
+    config: 'config'
+};
+
+var registrations = {
+
+};
+
 wsServer.on('request', function(request) {
     var connection = request.accept(null, request.origin);
     peerList.push(connection);
 
     connection.on('message', function(message) {
         if (message.type === 'utf8') {
-            console.log('Got message ' + message.utf8Data);
-            connection.sendUTF(message.utf8Data);
+            var message = JSON.parse(message.utf8Data);
+            var event_name = message.event;
+
+            if (!EVENT_NAMES[event_name]) {
+                console.log('Unknown event received');
+                console.log(message);
+            } else {
+                if (registrations[event_name]) {
+                    _.each(registrations[event_name], function(callback) {
+                        callback(message);
+                    });
+                }
+            }
         }
     });
     connection.on('close', function(reasonCode, description) {
@@ -37,7 +55,7 @@ wsServer.on('request', function(request) {
     });
 });
 
-function beacon(data) {
+function publish(data) {
     _.each(peerList, function(peerConnection) {
         if (peerConnection.connected) {
             peerConnection.sendUTF(JSON.stringify(data));
@@ -45,8 +63,20 @@ function beacon(data) {
     });
 }
 
-module.exports = function(data) {
-    //console.log('Beaconing Data:');
-    //console.log(data);
-    beacon(data);
+function register(event_name, callback) {
+    if (!EVENT_NAMES[event_name]) {
+        console.log('Unknown event: ' + event_name);
+    }
+
+    if (!registrations[event_name]) {
+        registrations[event_name] = [callback];
+    } else {
+        registrations.push(callback);
+    }
+}
+
+module.exports = {
+    publish: publish,
+    register: register,
+    events: EVENT_NAMES
 };
