@@ -5,7 +5,8 @@ var moment = require('moment');
 
 var defaultMotionOptions = {
     onNewPosition: function(){},
-    newPositionEventName: 'newPosition'
+    newPositionEventName: 'newPosition',
+    rollingAverageCount: 20, // Set to 0 or false to not use the rollingAverage
 };
 
 var defaultControlOptions = {
@@ -70,16 +71,29 @@ class ControlSignalStateMachine {
 
 class MotionController {
     constructor(options) {
+        if (options.rollingAverageCount == 0) {
+            options.rollingAverageCount = 1;
+        }
         this.options = _.assign(defaultMotionOptions, options);
         this.controlStateMachine = new ControlSignalStateMachine();
+        this.prevPositions = [];
+    }
+
+    rollingAverage() {
+        if (this.prevPositions.length > this.options.rollingAverageCount) {
+            this.prevPositions = _.drop(this.prevPositions, this.prevPositions.length - this.options.rollingAverageCount - 1);
+        }
+        return helper.average(this.prevPositions);
     }
 
     onHand(hand, sender) {
         if (hand.type === "right") {
             // Right hand is the directional controller hand for the drone
-            var newPosition = this.calculateNewPosition(hand);    
-            sender.emit(this.options.newPositionEventName, newPosition);
-            this.options.onNewPosition(newPosition);
+            var newPosition = this.calculateNewPosition(hand);
+            this.prevPositions.push(newPosition);
+            var currentPosition = this.rollingAverage();
+            sender.emit(this.options.newPositionEventName, currentPosition);
+            this.options.onNewPosition(currentPosition);
         } else {
             // Left hand is used for mode settings
             this.controlStateMachine.onHand(hand, sender);

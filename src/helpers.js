@@ -70,9 +70,29 @@ function isFist(hand) {
     return (totalLength/10.0) > fistThreshold;
 }
 
+function average(arr) {
+    var sum = {
+        roll: 0,
+        pitch: 0,
+        yaw: 0
+    };
+    for( var i = 0; i < arr.length; i++ ){
+        sum.roll += arr[i].roll;
+        sum.pitch += arr[i].pitch;
+        sum.yaw += arr[i].yaw;
+    }
+
+    return {
+        roll: sum.roll/arr.length,
+        pitch: sum.pitch/arr.length,
+        yaw: sum.yaw/arr.length
+    };
+}
+
 module.exports = {
     roll: calculateRoll,
     pitch: calculatePitch,
     yaw: calculateYaw,
-    isFist: isFist
+    isFist: isFist,
+    average: average
 };

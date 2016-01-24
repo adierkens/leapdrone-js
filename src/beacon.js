@@ -46,7 +46,7 @@ function beacon(data) {
 }
 
 module.exports = function(data) {
-    console.log('Beaconing Data:');
-    console.log(data);
+    //console.log('Beaconing Data:');
+    //console.log(data);
     beacon(data);
 };
