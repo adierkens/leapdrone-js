@@ -50,8 +50,20 @@ function calculatePitch(hand) {
     return -avgAngle / hand.fingers.length;
 }
 
-function calculateYaw() {
-    return 0;
+function calculateYaw(hand) {
+
+    // We need to map the hand's height to the range [ -PI/2, PI/2 ] to match the other axises
+    // The palm position is in mm and is the height over the sensor. We'll cap it at [ 0 - 300 ]
+    // as 150 is about the center of where you're hand normally rests
+
+    var palmHeight = hand.palmPosition[1];
+
+    // make sure it's within range
+    palmHeight = Math.min(palmHeight, 300);
+
+    var palmHeightPercent = palmHeight / 300.0;
+
+    return (Math.PI * palmHeightPercent) - (Math.PI / 2.0);
 }
 
 function isFist(hand) {

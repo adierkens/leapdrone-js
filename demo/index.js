@@ -30,7 +30,7 @@ var GoogleChart = {
 var QuadScene = {};
 
 function initGoogleChart() {
-    google.charts.load('current', { 'packages': ['line', 'corechart']});
+    google.charts.load('current', { 'packages': ['line']});
     google.charts.setOnLoadCallback(function(){
 
         var chartDiv = document.getElementById('motion_chart');
@@ -105,6 +105,7 @@ function init3DModel() {
         if (QuadScene.mesh) {
             QuadScene.mesh.rotation.x = currentPosition.pitch;
             QuadScene.mesh.rotation.y = Math.PI/2 + currentPosition.roll;
+            QuadScene.mesh.position.x = currentPosition.yaw * 50;
             QuadScene.camera.lookAt(QuadScene.scene.position);
             QuadScene.renderer.render(QuadScene.scene, QuadScene.camera);
         }
