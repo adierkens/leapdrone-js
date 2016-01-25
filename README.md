@@ -21,15 +21,48 @@ Simply request the 'leapdrone' plugin to use it.
 
 ```
 new Leap.Controller().use('leapdrone', { 
-    bankedController: true, 
+    controller: 'translational',
     onNewPosition: function(pos) {
-        beacon({
+        beacon.publish({
             event: 'position',
             data: pos
         });
     }
 }).connect();
 ```
+
+### Options
+
+#### options.controller
+Type: `String`
+
+The type of motion control to use: `banked` or `translational`
+
+#### options.onNewPosition
+Type: `Function`
+
+The callback when a new drone position is calculated. The parameter is an object: 
+```
+{
+    roll: 0,
+    pitch: 0,
+    yaw: 0,
+    metaData: {
+        controller: 'banked'
+    }
+}
+```
+
+`roll`, `pitch`, and `yaw` are all doubles between [ -PI/2, PI/2 ] representing the X, Y, Z angles the drone should take.
+
+#### options.rollingAverageCount
+Type: `Integer`
+Default value: `20`
+
+In order to smooth out the position calculations, a rolling average is used in the calculations. By default, the current position will be the average of the last 20 frames.  
+
+To disable the rolling average, set this to `false`, `0`, or `1`
+ 
 
 # TODO
  - Style the demo page, making it responsive
