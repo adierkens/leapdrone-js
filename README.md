@@ -31,5 +31,12 @@ new Leap.Controller().use('leapdrone', {
 }).connect();
 ```
 
-
+# TODO
+ - Style the demo page, making it responsive
+ - Make graph move smooth
+ - Debounce beaconing - sending batches of requests 
+ - Architect the backend for sending the I2C calls
+ - Handle the syncing/registration for connecting to a drone through RF
+ - Add control signals
+ - Add multiple drone support in the demo page
 
