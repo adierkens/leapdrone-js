@@ -4,7 +4,7 @@ var Leap = require('leapjs');
 
 var fistThreshold = .2;
 
-function calculateRoll(hand) {
+function calculateBankedRoll(hand) {
     var avgDeltaX = 0;
     var avgDeltaY = 0;
 
@@ -32,7 +32,7 @@ function calculateRoll(hand) {
     return -Math.atan(avgDeltaY/avgDeltaX);
 }
 
-function calculatePitch(hand) {
+function calculateBankedPitch(hand) {
     var palmY = hand.palmPosition[1];
     var palmZ = hand.palmPosition[2];
     var avgAngle = 0;
@@ -50,7 +50,7 @@ function calculatePitch(hand) {
     return -avgAngle / hand.fingers.length;
 }
 
-function calculateYaw(hand) {
+function calculateBankedYaw(hand) {
 
     // We need to map the hand's height to the range [ -PI/2, PI/2 ] to match the other axises
     // The palm position is in mm and is the height over the sensor. We'll cap it at [ 0 - 300 ]
@@ -58,12 +58,7 @@ function calculateYaw(hand) {
 
     var palmHeight = hand.palmPosition[1];
 
-    // make sure it's within range
-    palmHeight = Math.min(palmHeight, 300);
-
-    var palmHeightPercent = palmHeight / 300.0;
-
-    return (Math.PI * palmHeightPercent) - (Math.PI / 2.0);
+    return calculateAngleFromRange(palmHeight, 0, 300.0)
 }
 
 function isFist(hand) {
@@ -101,10 +96,39 @@ function average(arr) {
     };
 }
 
+function calculateAngleFromRange(distance, min, max) {
+    var distance = Math.max(Math.min(max, distance), min);
+    var distancePercent = (distance - min) / (max - min);
+    return (Math.PI * distancePercent) - (Math.PI / 2.0);
+}
+
+// -300 to 300
+function calculateTranslationalRoll(hand) {
+    var palmX = hand.palmPosition[0];
+    return calculateAngleFromRange(palmX, -300, 300);
+}
+
+// -250 to 250
+function calculateTranslationalPitch(hand) {
+    var palmZ = hand.palmPosition[2];
+    return calculateAngleFromRange(palmZ, -250, 250);
+}
+
+function calculateTranslationalYaw(hand) {
+    return calculateBankedYaw(hand);
+}
+
 module.exports = {
-    roll: calculateRoll,
-    pitch: calculatePitch,
-    yaw: calculateYaw,
+    banked: {
+        roll: calculateBankedRoll,
+        pitch: calculateBankedPitch,
+        yaw: calculateBankedYaw
+    },
+    translational: {
+        roll: calculateTranslationalRoll,
+        pitch: calculateTranslationalPitch,
+        yaw: calculateTranslationalYaw
+    },
     isFist: isFist,
     average: average
 };

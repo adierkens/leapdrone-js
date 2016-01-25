@@ -72,17 +72,17 @@ class ControlSignalStateMachine {
 
 function calculateBankedPosition(hand) {
     return {
-        roll: helper.roll(hand),
-        pitch: helper.pitch(hand),
-        yaw: helper.yaw(hand)
+        roll: helper.banked.roll(hand),
+        pitch: helper.banked.pitch(hand),
+        yaw: helper.banked.yaw(hand)
     };
 }
 
 function calculateTranslationalPosition(hand) {
     return {
-        roll: 0,
-        pitch: 0,
-        yaw: 0
+        roll: helper.translational.roll(hand),
+        pitch: helper.translational.pitch(hand),
+        yaw: helper.translational.yaw(hand)
     }
 }
 
@@ -109,6 +109,8 @@ class MotionController {
     calculateNewPosition(hand) {
         if (this.options.controller === 'banked') {
             return calculateBankedPosition(hand);
+        } else if (this.options.controller === 'translational') {
+            return calculateTranslationalPosition(hand);
         }
         return calculateTranslationalPosition(hand);
     }
