@@ -1,6 +1,4 @@
-/**
- * Created by Adam on 1/23/16.
- */
+'use strict';
 
 var config = {
     webSocetLocation: 'ws://localhost:8080',
@@ -155,6 +153,14 @@ function init() {
         setConfiguration({
             controller: this.value
         })
+    });
+
+    $('#chart-shown-checkbox').change(function() {
+        if (this.checked) {
+            $('#motion_chart').show();
+        } else {
+            $('#motion_chart').hide();
+        }
     });
 }
 

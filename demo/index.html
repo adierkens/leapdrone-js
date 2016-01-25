@@ -6,15 +6,53 @@
         <script type="text/javascript" src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.0.0/lodash.min.js"></script>
         <script type="text/javascript" src="index.js"></script>
+        <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+        <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        <link rel="stylesheet" href="http://fezvrasta.github.io/bootstrap-material-design/dist/css/bootstrap-material-design.css">
+        <link rel="stylesheet" href="style.css"/>
     </head>
     <body>
-        <div id="motion_chart" style="display: none"></div>
-        <div id="quad_scene"></div>
-        <div class="dropdown">
-            <select id="controller-type-select">
-                <option value="banked" >Banked</option>
-                <option value="translational">Translational</option>
-            </select>
+        <div class="header-panel"></div>
+        <div class="container-fluid main">
+            <div class="row">
+                <div class="col-sm-3 menu">
+                    <ul class="nav nav-pills nav-stacked">
+                        <li class="active">
+                            <a href="#graph-view" data-toggle="tab">Graphs</a>
+                        </li>
+                        <li>
+                            <a href="#config-view" data-toggle="tab">Configuration</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-sm-9">
+                    <div class="row container-fluid main">
+                        <div class="col-sm-5 tab-content">
+                            <div class="tab-pane fade active in" id="graph-view">
+                                <div id="quad_scene"></div>
+                                <div id="motion_chart"></div>
+                            </div>
+                            <div class="tab-pane fade" id="config-view">
+                                <div class="dropdown">
+                                    <label for="controller-type-select">Motion Controller Type</label>
+                                    <select id="controller-type-select" class="form-control">
+                                        <option value="banked" >Banked</option>
+                                        <option value="translational">Translational</option>
+                                    </select>
+                                </div>
+                                <div class="togglebutton">
+                                    <label>
+                                        <input id="chart-shown-checkbox" type="checkbox" checked>
+                                        <span class="toggle"></span>
+                                        Show line plot for roll/pitch/yaw
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </body>
 </html>

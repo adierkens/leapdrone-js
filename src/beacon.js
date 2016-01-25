@@ -24,9 +24,7 @@ const EVENT_NAMES = {
     config: 'config'
 };
 
-var registrations = {
-
-};
+var registrations = {};
 
 wsServer.on('request', function(request) {
     var connection = request.accept(null, request.origin);
