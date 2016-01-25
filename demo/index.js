@@ -28,6 +28,7 @@ var GoogleChart = {
 };
 
 var QuadScene = {};
+var websocket;
 
 function initGoogleChart() {
     google.charts.load('current', { 'packages': ['line']});
@@ -73,11 +74,16 @@ function onMessage(event) {
     if (eventData.event == 'position') {
         currentPosition = eventData.data;
         updateChart();
+        if (eventData.data.metaData && eventData.data.metaData.controller) {
+            $('#controller-type-select option').each(function() {
+                this.selected = eventData.data.metaData.controller == this.value;
+            });
+        }
     }
 }
 
 function initWebSocket() {
-    var websocket = new WebSocket(config.webSocetLocation);
+    websocket = new WebSocket(config.webSocetLocation);
     websocket.onmessage = onMessage;
 };
 
@@ -131,11 +137,25 @@ function loadSTL() {
     });
 }
 
+function setConfiguration(config) {
+    var eventData = {
+        event: 'config',
+        data: config
+    };
+    websocket.send(JSON.stringify(eventData));
+}
+
 function init() {
     console.log("Initializing");
     initGoogleChart();
     initWebSocket();
     init3DModel();
+
+    $('#controller-type-select').change(function() {
+        setConfiguration({
+            controller: this.value
+        })
+    });
 }
 
 window.onload = init;

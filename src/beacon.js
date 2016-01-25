@@ -50,7 +50,6 @@ wsServer.on('request', function(request) {
         }
     });
     connection.on('close', function(reasonCode, description) {
-        console.log('Peer ' + connection.remoteAddress + ' disconnected');
         _.remove(peerList, connection);
     });
 });

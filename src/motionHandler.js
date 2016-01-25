@@ -94,8 +94,11 @@ class MotionController {
         this.options = _.assign(defaultMotionOptions, options);
         this.controlStateMachine = new ControlSignalStateMachine();
         this.prevPositions = [];
+        var self = this;
         beacon.register(beacon.events.config, function(data) {
-            this.options.assign(this.options, data.data);
+            console.log('Updating configuration');
+            console.log(data.data);
+            _.assign(self.options, data.data);
         });
     }
 
@@ -107,12 +110,18 @@ class MotionController {
     }
 
     calculateNewPosition(hand) {
+        var position = {};
         if (this.options.controller === 'banked') {
-            return calculateBankedPosition(hand);
+            position = calculateBankedPosition(hand);
         } else if (this.options.controller === 'translational') {
-            return calculateTranslationalPosition(hand);
+            position = calculateTranslationalPosition(hand);
         }
-        return calculateTranslationalPosition(hand);
+
+        position.metaData = {
+            controller: this.options.controller
+        };
+
+        return position;
     }
 
     onHand(hand, sender) {
@@ -121,6 +130,7 @@ class MotionController {
             var newPosition = this.calculateNewPosition(hand);
             this.prevPositions.push(newPosition);
             var currentPosition = this.rollingAverage();
+            currentPosition.metaData = newPosition.metaData;
             sender.emit(this.options.newPositionEventName, currentPosition);
             this.options.onNewPosition(currentPosition);
         } else {
