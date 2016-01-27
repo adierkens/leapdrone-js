@@ -1,7 +1,7 @@
 'use strict';
 
 var config = {
-    webSocetLocation: 'ws://localhost:8080',
+    webSocetLocation: 'ws://' + window.location.hostname + ':8080',
     stlLocation: 'micro_quad.stl'
 };
 
