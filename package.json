@@ -31,6 +31,9 @@
     "moment": "^2.10.6",
     "websocket": "^1.0.22"
   },
+  "optionalDependencies": {
+    "adafruit-i2c-pwm-driver": "^0.0.2"
+  },
   "devDependencies": {
     "chai": "^3.4.0",
     "mocha": "^2.3.3"

@@ -5,3 +5,12 @@
 #config-view > * {
     padding-bottom: 20px;
 }
+
+#quad_scene > canvas {
+    border: 1px solid black;
+    border-radius: 5px;
+}
+
+#graph-view > * {
+    padding-bottom: 50px;
+}

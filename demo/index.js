@@ -86,8 +86,12 @@ function initWebSocket() {
 };
 
 function init3DModel() {
-    var renderer = new THREE.WebGLRenderer( { antialias: true } );
+    var renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true
+    });
     renderer.setSize(900, 500);
+    renderer.setClearColor(0x000000, 1);
     QuadScene.renderer = renderer;
     document.getElementById('quad_scene').appendChild(renderer.domElement);
 

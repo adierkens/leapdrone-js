@@ -2,6 +2,7 @@ var LeapJS = require('.');
 var Leap = require('leapjs');
 var beacon = require('./src/beacon');
 var express = require('express');
+var drone = require('./src/drone');
 
 new Leap.Controller().use('leapdrone', { 
     controller: 'translational',
@@ -10,6 +11,8 @@ new Leap.Controller().use('leapdrone', {
             event: 'position',
             data: pos
         });
+
+        drone.update(pos);
     }
 }).connect();
 

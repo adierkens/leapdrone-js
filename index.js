@@ -9,6 +9,9 @@ Leap.plugin('leapdrone', function(options) {
     return {
         hand: function(hand) {
             leapDrone.onHand(hand, this);
+        },
+        frame: function(frame) {
+            leapDrone.onFrame(frame, this);
         }
     };
 });

@@ -6,7 +6,9 @@ var beacon = require('./beacon');
 
 var defaultMotionOptions = {
     onNewPosition: function(){},
+    onHandLost: function(side){},
     newPositionEventName: 'newPosition',
+    lostHandEventName: 'handLost',
     rollingAverageCount: 20, // Set to 0 or false to not use the rollingAverage
 };
 
@@ -94,6 +96,7 @@ class MotionController {
         this.options = _.assign(defaultMotionOptions, options);
         this.controlStateMachine = new ControlSignalStateMachine();
         this.prevPositions = [];
+        this.activeHands = {};
         var self = this;
         beacon.register(beacon.events.config, function(data) {
             console.log('Updating configuration');
@@ -137,6 +140,38 @@ class MotionController {
             // Left hand is used for mode settings
             this.controlStateMachine.onHand(hand, sender);
         }
+    }
+
+    onFrame(frame, sender) {
+
+        var newFrameHands = {};
+        var self = this;
+
+        _.each(frame.hands, function(hand) {
+            newFrameHands[hand.id] = hand;
+        });
+
+
+        _.forIn(this.activeHands, function(hand, handID) {
+
+            if (!newFrameHands[handID]) {
+                sender.emit(self.options.lostHandEventName, hand.type);
+                self.options.onHandLost(hand.type);
+
+                if (hand.type === "right") {
+                    var position = {
+                        roll: 0,
+                        pitch: 0,
+                        yaw: 0
+                    };
+                    sender.emit(self.options.newPositionEventName, position);
+                    self.options.onNewPosition(position);
+                }
+            }
+
+        });
+
+        this.activeHands = newFrameHands;
     }
  
 }
