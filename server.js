@@ -5,7 +5,7 @@ var express = require('express');
 var drone = require('./src/drone');
 
 new Leap.Controller().use('leapdrone', { 
-    controller: 'translational',
+    controller: 'banked',
     onNewPosition: function(pos) {
         beacon.publish({
             event: 'position',
