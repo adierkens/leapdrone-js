@@ -35,6 +35,7 @@ function calculateBankedRoll(hand) {
 function calculateBankedPitch(hand) {
     var palmY = hand.palmPosition[1];
     var palmZ = hand.palmPosition[2];
+
     var avgAngle = 0;
 
     hand.fingers.forEach(function(finger) {
@@ -53,12 +54,12 @@ function calculateBankedPitch(hand) {
 function calculateBankedYaw(hand) {
 
     // We need to map the hand's height to the range [ -PI/2, PI/2 ] to match the other axises
-    // The palm position is in mm and is the height over the sensor. We'll cap it at [ 0 - 300 ]
+    // The palm position is in mm and is the height over the sensor. We'll cap it at [ 20 - 300 ]
     // as 150 is about the center of where you're hand normally rests
 
     var palmHeight = hand.palmPosition[1];
 
-    return calculateAngleFromRange(palmHeight, 0, 300.0)
+    return calculateAngleFromRange(palmHeight, 50, 600.0)
 }
 
 function isFist(hand) {
@@ -108,10 +109,9 @@ function calculateTranslationalRoll(hand) {
     return calculateAngleFromRange(palmX, -300, 300);
 }
 
-// -250 to 250
 function calculateTranslationalPitch(hand) {
     var palmZ = hand.palmPosition[2];
-    return calculateAngleFromRange(palmZ, -250, 250);
+    return calculateAngleFromRange(palmZ, -300, 300);
 }
 
 function calculateTranslationalYaw(hand) {
