@@ -1,17 +1,19 @@
 'use strict';
 var Leap = require('leapjs');
 var motionHandler = require('./src/motionHandler');
+var Logger = require('js-logger');
+Logger.useDefaults();
 
 Leap.plugin('leapdrone', function(options) {
 
-    var leapDrone = motionHandler(options);
+  var leapDrone = motionHandler(options);
 
-    return {
-        hand: function(hand) {
-            leapDrone.onHand(hand, this);
-        },
-        frame: function(frame) {
-            leapDrone.onFrame(frame, this);
-        }
-    };
+  return {
+    hand: function(hand) {
+      leapDrone.onHand(hand, this);
+    },
+    frame: function(frame) {
+      leapDrone.onFrame(frame, this);
+    }
+  };
 });
