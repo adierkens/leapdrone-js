@@ -62,7 +62,7 @@ function publish(data) {
 }
 
 function register(event_name, callback) {
-  if (!EVENT_NAMES[event_name]) {
+  if (_.values(EVENT_NAMES).indexOf(event_name) === -1) {
     console.log('Unknown event: ' + event_name);
   }
 

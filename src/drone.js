@@ -14,7 +14,7 @@ var PCAOptions = {
 const INITIAL_DUTY_CYCLE = {
   roll: 0.5,
   pitch: 0.5,
-  yaw: 0.001
+  yaw: 0
 };
 
 const PWM_CHANNEL_MAP = {
@@ -34,7 +34,11 @@ try {
     Logger.info("PWM Initialization done.");
 
     _.forIn(INITIAL_DUTY_CYCLE, function(dutyCycle, direction) {
-      pwm.setDutyCycle(PWM_CHANNEL_MAP[direction], dutyCycle);
+      if (dutyCycle <= .001) {
+        zeroChannel(PWM_CHANNEL_MAP[direction]);
+      } else {
+        pwm.setDutyCycle(PWM_CHANNEL_MAP[direction], dutyCycle);
+      }
     });
   });
 
@@ -56,7 +60,7 @@ function getI2CBus() {
  * @param channel
  */
 function zeroChannel(channel) {
-  pwm.setDutyCycle(channel, 0.001);
+  pwm.setPulseRange(channel, 0, 0);
 }
 
 /**
@@ -81,6 +85,7 @@ function sync() {
     pwm.setDutyCycle(PWM_CHANNEL_MAP.yaw, 1);
     setTimeout(function() {
       zeroChannel(PWM_CHANNEL_MAP.yaw);
+      Logger.info('Finished Drone Sync');
     }, QUAD_SYNC_DELAY);
   }, QUAD_SYNC_DELAY);
 }
@@ -104,7 +109,7 @@ var droneControl = {
   update: function(position_update) {
     _.forIn(PWM_CHANNEL_MAP, function(channel, direction) {
       var dutyCycle = dutyCycleFromAngle(position_update[direction]);
-      if (dutyCycle <= 0.001 ) {
+      if (dutyCycle <= 0.1 ) {
         zeroChannel(channel);
       } else {
         pwm.setDutyCycle(channel, dutyCycle);
@@ -120,3 +125,4 @@ if (PCA9685Driver) {
     update: function (position_update) {}
   };
 }
+
