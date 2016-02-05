@@ -65,11 +65,12 @@ To disable the rolling average, set this to `false`, `0`, or `1`
  
 
 # TODO
- - Style the demo page, making it responsive
+ - ~~Style the demo page~~ 
+ - Make demo page responsive
  - Make graph move smooth
  - Debounce beaconing - sending batches of requests 
- - Architect the backend for sending the I2C calls
- - Handle the syncing/registration for connecting to a drone through RF
+ - ~~Architect the backend for sending the I2C calls~~
+ - ~~Handle the syncing/registration for connecting to a drone through RF~~
  - Add control signals
  - Add multiple drone support in the demo page
 
