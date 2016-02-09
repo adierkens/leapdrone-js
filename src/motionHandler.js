@@ -9,7 +9,7 @@ var defaultMotionOptions = {
     onHandLost: function(side){},
     newPositionEventName: 'newPosition',
     lostHandEventName: 'handLost',
-    rollingAverageCount: 20, // Set to 0 or false to not use the rollingAverage
+    rollingAverageCount: 5, // Set to 0 or false to not use the rollingAverage
 };
 
 var defaultControlOptions = {
@@ -162,7 +162,7 @@ class MotionController {
                     var position = {
                         roll: 0,
                         pitch: 0,
-                        yaw: 0
+                        yaw: -(Math.PI/2)
                     };
                     sender.emit(self.options.newPositionEventName, position);
                     self.options.onNewPosition(position);

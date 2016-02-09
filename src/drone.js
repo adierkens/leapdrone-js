@@ -23,7 +23,7 @@ const PWM_CHANNEL_MAP = {
   yaw: 2
 };
 
-const QUAD_SYNC_DELAY = 1000; // The time (ms) to wait between sync transitions
+const QUAD_SYNC_DELAY = 2000; // The time (ms) to wait between sync transitions
 
 try {
   I2CBus = require('i2c-bus');
@@ -109,7 +109,7 @@ var droneControl = {
   update: function(position_update) {
     _.forIn(PWM_CHANNEL_MAP, function(channel, direction) {
       var dutyCycle = dutyCycleFromAngle(position_update[direction]);
-      if (dutyCycle <= 0.1 ) {
+      if (dutyCycle <= 0.0001 ) {
         zeroChannel(channel);
       } else {
         pwm.setDutyCycle(channel, dutyCycle);
@@ -126,3 +126,11 @@ if (PCA9685Driver) {
   };
 }
 
+/**
+ * Zero all of the channels when we're done
+ */
+process.on('SIGTERM', function() {
+  _.forIn(PWM_CHANNEL_MAP, function(channel, direction) {
+    zeroChannel(channel);
+  });
+});

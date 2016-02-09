@@ -11,7 +11,7 @@ const LEAP_BOUNDARIES = {
   },
   y: {
     min: 50,
-    max: 600
+    max: 1000
   },
   z: {
     min: -300,
