@@ -128,7 +128,6 @@ function average(arr) {
 
   _.each(constants.directions, function(dir) {
     sum[dir] = 0;
-    console.log(dir);
   });
 
   for( var i = 0; i < arr.length; i++ ){
