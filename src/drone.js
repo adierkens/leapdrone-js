@@ -2,6 +2,7 @@
 var _ = require('lodash');
 var beacon = require('./beacon');
 var Logger = require('js-logger');
+var constants = require('./constants');
 
 var I2CBus, PCA9685Driver, pwm;
 
@@ -12,15 +13,17 @@ var PCAOptions = {
 };
 
 const INITIAL_DUTY_CYCLE = {
-  roll: 0.5,
-  pitch: 0.5,
-  yaw: 0
+  roll: dutyCycleFromAngle(constants.defaultPosition.roll),
+  pitch: dutyCycleFromAngle(constants.defaultPosition.pitch),
+  yaw: dutyCycleFromAngle(constants.defaultPosition.yaw),
+  throttle: dutyCycleFromAngle(constants.defaultPosition.throttle)
 };
 
 const PWM_CHANNEL_MAP = {
   roll: 0,
   pitch: 1,
-  yaw: 2
+  throttle: 2,
+  yaw: 3
 };
 
 const QUAD_SYNC_DELAY = 2000; // The time (ms) to wait between sync transitions
@@ -74,7 +77,7 @@ function sync() {
     return;
   }
   _.forIn(PWM_CHANNEL_MAP, function(channel, direction) {
-    if (direction === 'yaw') {
+    if (direction === 'throttle') {
       zeroChannel(channel);
     } else {
       pwm.setDutyCycle(channel, 0.5);
@@ -82,9 +85,9 @@ function sync() {
   });
 
   setTimeout(function() {
-    pwm.setDutyCycle(PWM_CHANNEL_MAP.yaw, 1);
+    pwm.setDutyCycle(PWM_CHANNEL_MAP.throttle, 1);
     setTimeout(function() {
-      zeroChannel(PWM_CHANNEL_MAP.yaw);
+      zeroChannel(PWM_CHANNEL_MAP.throttle);
       Logger.info('Finished Drone Sync');
     }, QUAD_SYNC_DELAY);
   }, QUAD_SYNC_DELAY);

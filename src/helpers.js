@@ -1,6 +1,7 @@
 'use strict';
 var _ = require('lodash');
 var Leap = require('leapjs');
+var constants = require('./constants');
 
 var fistThreshold = .2;
 
@@ -19,61 +20,73 @@ const LEAP_BOUNDARIES = {
   }
 };
 
-function calculateBankedRoll(hand) {
-  var avgDeltaX = 0;
-  var avgDeltaY = 0;
+const banked = {
+  roll: function(hand) {
+    var avgDeltaX = 0;
+    var avgDeltaY = 0;
 
-  var lastFinger;
+    var lastFinger;
 
-  hand.fingers.forEach(function(finger) {
-    if (finger.type === 0 || finger.type === 4) {
-      return;
-    }
+    hand.fingers.forEach(function(finger) {
+      if (finger.type === 0 || finger.type === 4) {
+        return;
+      }
 
-    if (!lastFinger) {
+      if (!lastFinger) {
+        lastFinger = finger;
+        return;
+      }
+
+      avgDeltaX += finger.dipPosition[0] - lastFinger.dipPosition[0];
+      avgDeltaY += finger.dipPosition[1] - lastFinger.dipPosition[1];
+
       lastFinger = finger;
-      return;
-    }
+    });
 
-    avgDeltaX += finger.dipPosition[0] - lastFinger.dipPosition[0];
-    avgDeltaY += finger.dipPosition[1] - lastFinger.dipPosition[1];
+    avgDeltaX = avgDeltaX/hand.fingers.length;
+    avgDeltaY = avgDeltaY/hand.fingers.length;
 
-    lastFinger = finger;
-  });
+    return -Math.atan(avgDeltaY/avgDeltaX);
+  },
+  pitch: function(hand) {
+    var palmY = hand.palmPosition[1];
+    var palmZ = hand.palmPosition[2];
 
-  avgDeltaX = avgDeltaX/hand.fingers.length;
-  avgDeltaY = avgDeltaY/hand.fingers.length;
+    var avgAngle = 0;
 
-  return -Math.atan(avgDeltaY/avgDeltaX);
-}
+    hand.fingers.forEach(function(finger) {
+      if (finger.type === 0 || finger.type === 4) {
+        return;
+      }
 
-function calculateBankedPitch(hand) {
-  var palmY = hand.palmPosition[1];
-  var palmZ = hand.palmPosition[2];
+      var deltaY = finger.dipPosition[1] - palmY;
+      var deltaZ = finger.dipPosition[2] - palmZ;
+      avgAngle += Math.atan(deltaY/deltaZ);
+    });
 
-  var avgAngle = 0;
+    return -avgAngle / hand.fingers.length;
+  },
+  yaw: function(hand) {
+    return 0;
+  },
+  throttle: function(hand) {
+    var palmHeight = hand.palmPosition[1];
+    return calculateAngleFromRange(palmHeight, LEAP_BOUNDARIES.y.min, LEAP_BOUNDARIES.y.max);
+  }
+};
 
-  hand.fingers.forEach(function(finger) {
-    if (finger.type === 0 || finger.type === 4) {
-      return;
-    }
-
-    var deltaY = finger.dipPosition[1] - palmY;
-    var deltaZ = finger.dipPosition[2] - palmZ;
-    avgAngle += Math.atan(deltaY/deltaZ);
-  });
-
-  return -avgAngle / hand.fingers.length;
-}
-
-function calculateBankedYaw(hand) {
-
-  // We need to map the hand's height to the range [ -PI/2, PI/2 ] to match the other axises
-  // The palm position is in mm and is the height over the sensor. We'll cap it at [ 50 - 600 ]
-  // as 300 is about the center of where you're hand normally rests
-  var palmHeight = hand.palmPosition[1];
-  return calculateAngleFromRange(palmHeight, LEAP_BOUNDARIES.y.min, LEAP_BOUNDARIES.y.max);
-}
+const translational = {
+  roll: function(hand) {
+    var palmX = hand.palmPosition[0];
+    return calculateAngleFromRange(palmX, LEAP_BOUNDARIES.x.min, LEAP_BOUNDARIES.x.max);
+  },
+  pitch: function (hand) {
+    var palmZ = hand.palmPosition[2];
+    return calculateAngleFromRange(palmZ, LEAP_BOUNDARIES.z.min, LEAP_BOUNDARIES.z.max);
+  },
+  yaw: banked.yaw,
+  throttle: banked.throttle
+};
 
 function isFist(hand) {
   var totalLength = 0;
@@ -92,22 +105,22 @@ function isFist(hand) {
 }
 
 function average(arr) {
-  var sum = {
-    roll: 0,
-    pitch: 0,
-    yaw: 0
-  };
+  var sum = {};
+
+  _.each(constants.directions, function(dir) {
+    sum[dir] = 0;
+    console.log(dir);
+  });
+
   for( var i = 0; i < arr.length; i++ ){
-    sum.roll += arr[i].roll;
-    sum.pitch += arr[i].pitch;
-    sum.yaw += arr[i].yaw;
+    _.each(constants.directions, function(dir) {
+      sum[dir] += arr[i][dir];
+    });
   }
 
-  return {
-    roll: sum.roll/arr.length,
-    pitch: sum.pitch/arr.length,
-    yaw: sum.yaw/arr.length
-  };
+  return _.mapValues(sum, function(tot) {
+    return tot/arr.length;
+  });
 }
 
 function calculateAngleFromRange(distance, min, max) {
@@ -116,31 +129,9 @@ function calculateAngleFromRange(distance, min, max) {
   return (Math.PI * distancePercent) - (Math.PI / 2.0);
 }
 
-function calculateTranslationalRoll(hand) {
-  var palmX = hand.palmPosition[0];
-  return calculateAngleFromRange(palmX, LEAP_BOUNDARIES.x.min, LEAP_BOUNDARIES.x.max);
-}
-
-function calculateTranslationalPitch(hand) {
-  var palmZ = hand.palmPosition[2];
-  return calculateAngleFromRange(palmZ, LEAP_BOUNDARIES.z.min, LEAP_BOUNDARIES.z.max);
-}
-
-function calculateTranslationalYaw(hand) {
-  return calculateBankedYaw(hand);
-}
-
 module.exports = {
-  banked: {
-    roll: calculateBankedRoll,
-    pitch: calculateBankedPitch,
-    yaw: calculateBankedYaw
-  },
-  translational: {
-    roll: calculateTranslationalRoll,
-    pitch: calculateTranslationalPitch,
-    yaw: calculateTranslationalYaw
-  },
+  banked: banked,
+  translational: translational,
   isFist: isFist,
   average: average
 };

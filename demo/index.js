@@ -8,7 +8,8 @@ var config = {
 var currentPosition = {
   roll: 0,
   pitch: 0,
-  yaw: 0
+  yaw: 0,
+  throttle: 0
 };
 
 var GoogleChart = {
@@ -38,7 +39,8 @@ function initGoogleChart() {
     dataTable.addColumn('number', 'roll');
     dataTable.addColumn('number', 'pitch');
     dataTable.addColumn('number', 'yaw');
-    dataTable.addRow([new Date(), 0, 0, 0]);
+    dataTable.addColumn('number', 'throttle');
+    dataTable.addRow([new Date(), 0, 0, 0, 0]);
 
     GoogleChart.dataTable = dataTable;
 
@@ -62,7 +64,7 @@ function initGoogleChart() {
 
 function updateChart() {
   if (GoogleChart.dataTable) {
-    GoogleChart.dataTable.addRow([new Date(), currentPosition.roll, currentPosition.pitch, currentPosition.yaw]);
+    GoogleChart.dataTable.addRow([new Date(), currentPosition.roll, currentPosition.pitch, currentPosition.yaw, currentPosition.throttle]);
     GoogleChart.draw();
   }
 }
@@ -113,7 +115,7 @@ function init3DModel() {
     if (QuadScene.mesh) {
       QuadScene.mesh.rotation.x = currentPosition.pitch;
       QuadScene.mesh.rotation.y = Math.PI/2 + currentPosition.roll;
-      QuadScene.mesh.position.x = currentPosition.yaw * 50;
+      QuadScene.mesh.position.x = currentPosition.throttle * 50;
       QuadScene.camera.lookAt(QuadScene.scene.position);
       QuadScene.renderer.render(QuadScene.scene, QuadScene.camera);
     }
