@@ -26,11 +26,11 @@
   "homepage": "https://github.com/adierkens/leapdronejs#readme",
   "dependencies": {
     "express": "^4.13.4",
-    "js-logger": "^1.2.0",
     "leapjs": "^0.6.4",
     "lodash": "^3.10.1",
     "moment": "^2.10.6",
-    "websocket": "^1.0.22"
+    "websocket": "^1.0.22",
+    "winston": "^2.1.1"
   },
   "optionalDependencies": {
     "i2c-bus": "^1.0.2",
@@ -38,8 +38,6 @@
   },
   "devDependencies": {
     "chai": "^3.4.0",
-    "grunt": "^0.4.5",
-    "grunt-contrib-watch": "^0.6.1",
     "mocha": "^2.3.3"
   }
 }

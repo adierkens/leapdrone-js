@@ -1,7 +1,8 @@
 'use strict';
 var _ = require('lodash');
 var beacon = require('./beacon');
-var Logger = require('js-logger');
+var Logger = require('./log');
+var constants = require('./constants');
 
 var I2CBus, PCA9685Driver, pwm;
 
@@ -12,19 +13,35 @@ var PCAOptions = {
 };
 
 const INITIAL_DUTY_CYCLE = {
-  roll: 0.5,
-  pitch: 0.5,
-  yaw: 0
+  roll: dutyCycleFromAngle(constants.defaultPosition.roll),
+  pitch: dutyCycleFromAngle(constants.defaultPosition.pitch),
+  yaw: dutyCycleFromAngle(constants.defaultPosition.yaw),
+  throttle: dutyCycleFromAngle(constants.defaultPosition.throttle)
 };
 
 const PWM_CHANNEL_MAP = {
   roll: 0,
   pitch: 1,
-  yaw: 2
+  throttle: 2,
+  yaw: 3
 };
 
-const QUAD_SYNC_DELAY = 2000; // The time (ms) to wait between sync transitions
+/**
+ * The time (ms) to wait between sync transitions
+ */
+const QUAD_SYNC_DELAY = 2000; //
 
+/**
+ * NOTE: The PWM controller doesn't like really low dutyCycle numbers
+ * Using pwm.setDutyCycle() with a number below this threshold will actually set the channel to be HIGH.
+ * To combat this, anything at or below this number gets the channel explicitly set to 0 using setPulseRange(). See zeroChannel()
+ */
+const ZERO_THRESHOLD = 0.001;
+
+/**
+ * Some dev machines (i.e. My MacBook) doesn't have a valid I2C bus
+ * Gracefully handle when we can't control the PWM board so development isn't blocked.
+ */
 try {
   I2CBus = require('i2c-bus');
   PCA9685Driver = require('pca9685').Pca9685Driver;
@@ -33,12 +50,11 @@ try {
   pwm = new PCA9685Driver(PCAOptions, function() {
     Logger.info("PWM Initialization done.");
 
+    /**
+     * Set all the initial PWM signals
+     */
     _.forIn(INITIAL_DUTY_CYCLE, function(dutyCycle, direction) {
-      if (dutyCycle <= .001) {
-        zeroChannel(PWM_CHANNEL_MAP[direction]);
-      } else {
-        pwm.setDutyCycle(PWM_CHANNEL_MAP[direction], dutyCycle);
-      }
+      setDutyCycle(PWM_CHANNEL_MAP[direction], dutyCycle);
     });
   });
 
@@ -64,6 +80,20 @@ function zeroChannel(channel) {
 }
 
 /**
+ * Sets the duty cycle of a channel.
+ * Correctly handles the oddities with dutyCycle numbers near 0
+ * @param channel - The channel to set the dutyCycle on
+ * @param dutyCycle - The dutyCycle to set in the range of [0,1]
+ */
+function setDutyCycle(channel, dutyCycle) {
+  if (dutyCycle <= ZERO_THRESHOLD) {
+    zeroChannel(channel);
+  } else {
+    pwm.setDutyCycle(channel, dutyCycle);
+  }
+}
+
+/**
  * Syncs the drone with the controller
  * The throttle needs to go from 0-3.3v-0
  * All other axises are 1.65
@@ -73,30 +103,47 @@ function sync() {
     Logger.warn('PWM not supported. Ignoring sync..');
     return;
   }
+
+  /**
+   * Set the initial conditions - 0 throttle, everything else in the middle
+   */
   _.forIn(PWM_CHANNEL_MAP, function(channel, direction) {
-    if (direction === 'yaw') {
+    if (direction === 'throttle') {
       zeroChannel(channel);
     } else {
       pwm.setDutyCycle(channel, 0.5);
     }
   });
 
+  /**
+   * After QUAD_SYNC_DELAY ms, set the throttle to 100%
+   */
   setTimeout(function() {
-    pwm.setDutyCycle(PWM_CHANNEL_MAP.yaw, 1);
+    pwm.setDutyCycle(PWM_CHANNEL_MAP.throttle, 1);
+
+    /**
+     * After another QUAD_SYNC_DELAY ms, set the throttle back down to 0
+     */
     setTimeout(function() {
-      zeroChannel(PWM_CHANNEL_MAP.yaw);
+      zeroChannel(PWM_CHANNEL_MAP.throttle);
       Logger.info('Finished Drone Sync');
     }, QUAD_SYNC_DELAY);
   }, QUAD_SYNC_DELAY);
 }
 
-// Handle the sync event for a drone
+/**
+ * Handle the sync event for a drone
+ */
 beacon.register(beacon.events.droneSync, function(ev) {
   Logger.info('Starting Drone Sync');
   sync();
 });
 
-
+/**
+ * Calculate the duty cycle, given an angle from [-PI/2, PI/2]
+ * @param angle - the angle in radians
+ * @returns {number} - the duty cycle. Range from [0-1]
+ */
 function dutyCycleFromAngle(angle) {
   return (angle + (Math.PI/2)) / Math.PI;
 };
@@ -109,15 +156,14 @@ var droneControl = {
   update: function(position_update) {
     _.forIn(PWM_CHANNEL_MAP, function(channel, direction) {
       var dutyCycle = dutyCycleFromAngle(position_update[direction]);
-      if (dutyCycle <= 0.0001 ) {
-        zeroChannel(channel);
-      } else {
-        pwm.setDutyCycle(channel, dutyCycle);
-      }
+      setDutyCycle(channel, dutyCycle);
     });
   }
 };
 
+/**
+ * If we don't have a PWM controller, use a dummy drone controller
+ */
 if (PCA9685Driver) {
   module.exports = droneControl;
 } else {
