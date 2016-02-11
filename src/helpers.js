@@ -2,9 +2,12 @@
 var _ = require('lodash');
 var Leap = require('leapjs');
 var constants = require('./constants');
-
 var fistThreshold = .2;
 
+/**
+ * The boundaries of the effective range of the leap motion
+ * Measured in mm, with [0,0,0] being the leap itself
+ */
 const LEAP_BOUNDARIES = {
   x: {
     min: -300,
@@ -20,6 +23,9 @@ const LEAP_BOUNDARIES = {
   }
 };
 
+/**
+ * The functions to calculate roll, pitch, yaw, and throttle using the banked hand motions
+ */
 const banked = {
   roll: function(hand) {
     var avgDeltaX = 0;
@@ -75,6 +81,9 @@ const banked = {
   }
 };
 
+/**
+ * The functions to calculate roll, pitch, yaw, and throttle using the translational hand motions
+ */
 const translational = {
   roll: function(hand) {
     var palmX = hand.palmPosition[0];
@@ -88,6 +97,11 @@ const translational = {
   throttle: banked.throttle
 };
 
+/**
+ * A function to check if the given hand is making a fist
+ * @param hand - Leap instance of a hand
+ * @returns {boolean} - true if the hand is in a fist
+ */
 function isFist(hand) {
   var totalLength = 0;
   var palmPosition = hand.palmPosition;
@@ -104,6 +118,11 @@ function isFist(hand) {
   return (totalLength/10.0) > fistThreshold;
 }
 
+/**
+ * Computes the composite average of an array of positions
+ * @param arr - An array of positions
+ * @returns {object} - A dictionary of roll, pitch, yaw, and throttle positions reflecting the average
+ */
 function average(arr) {
   var sum = {};
 
@@ -123,6 +142,13 @@ function average(arr) {
   });
 }
 
+/**
+ * Calculates the effective angle from [-PI/2,PI/2]
+ * @param distance - the measurement
+ * @param min - the minimum of the measurement range
+ * @param max - the maximum of the measurement range
+ * @returns {number} - angle in radians
+ */
 function calculateAngleFromRange(distance, min, max) {
   var distance = Math.max(Math.min(max, distance), min);
   var distancePercent = (distance - min) / (max - min);

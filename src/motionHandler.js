@@ -72,6 +72,7 @@ class ControlSignalStateMachine {
   }
 }
 
+
 class MotionController {
 
   constructor(options) {
@@ -90,6 +91,10 @@ class MotionController {
     });
   }
 
+  /**
+   * Calculates the current rolling average
+   * @returns {Object} - the current position
+   */
   rollingAverage() {
     if (this.prevPositions.length > this.options.rollingAverageCount) {
       this.prevPositions = _.drop(this.prevPositions, this.prevPositions.length - this.options.rollingAverageCount - 1);
@@ -97,6 +102,11 @@ class MotionController {
     return helper.average(this.prevPositions);
   }
 
+  /**
+   * Calculates the new position given a hand object
+   * @param hand - a Leap Hand instance
+   * @returns {Object} - the new position
+   */
   calculateNewPosition(hand) {
     var position = {};
     var self = this;
@@ -111,6 +121,12 @@ class MotionController {
     return position;
   }
 
+  /**
+   * The callback when a new frame with a hand is found
+   * Calculates the current position/control scheme based on if the hand is left or right
+   * @param hand - The hand that is found in frame
+   * @param sender - A Leap Controller
+   */
   onHand(hand, sender) {
     if (hand.type === "right") {
       // Right hand is the directional controller hand for the drone
@@ -126,6 +142,12 @@ class MotionController {
     }
   }
 
+  /**
+   * The callback when a new frame is found
+   * Checks to see if we lost the right hand, if so, sets the position of the drone to the default one
+   * @param frame - The frame that's found
+   * @param sender - A Leap Controller
+   */
   onFrame(frame, sender) {
 
     var newFrameHands = {};
