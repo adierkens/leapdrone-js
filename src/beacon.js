@@ -2,6 +2,7 @@
 var _ = require('lodash');
 var WebSocketServer = require('websocket').server;
 var http = require('http');
+const log = require('./log');
 
 var server = http.createServer(function(request, response) {
   response.writeHead(500, {"Content-Type": "text/plain"});
@@ -10,7 +11,7 @@ var server = http.createServer(function(request, response) {
 });
 
 server.listen(8080, function() {
-  console.log('Beaconing Server is listening on port 8080');
+  log.info('Beaconing Server is listening on port 8080');
 });
 
 var wsServer = new WebSocketServer({
@@ -46,8 +47,7 @@ wsServer.on('request', function(request) {
       var event_name = message.event;
 
       if (_.values(EVENT_NAMES).indexOf(event_name) === -1) {
-        console.log('Unknown event received');
-        console.log(message);
+        log.warn('Unknown event received %j', message);
       } else {
         if (registrations[event_name]) {
           _.each(registrations[event_name], function(callback) {
@@ -81,7 +81,8 @@ function publish(data) {
  */
 function register(event_name, callback) {
   if (_.values(EVENT_NAMES).indexOf(event_name) === -1) {
-    console.log('Unknown event: ' + event_name);
+    log.warn('Unknown event: %s', event_name);
+
   }
 
   if (!registrations[event_name]) {

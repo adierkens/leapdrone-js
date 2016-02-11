@@ -1,8 +1,6 @@
 'use strict';
 var Leap = require('leapjs');
 var motionHandler = require('./src/motionHandler');
-var Logger = require('js-logger');
-Logger.useDefaults();
 
 Leap.plugin('leapdrone', function(options) {
 

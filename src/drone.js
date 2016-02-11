@@ -1,7 +1,7 @@
 'use strict';
 var _ = require('lodash');
 var beacon = require('./beacon');
-var Logger = require('js-logger');
+var Logger = require('./log');
 var constants = require('./constants');
 
 var I2CBus, PCA9685Driver, pwm;

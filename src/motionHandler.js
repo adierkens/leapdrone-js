@@ -4,6 +4,7 @@ var helper = require('./helpers');
 var moment = require('moment');
 var beacon = require('./beacon');
 var constants = require('./constants');
+var log = require('./log');
 
 var defaultMotionOptions = {
   onNewPosition: function(){},
@@ -46,7 +47,7 @@ class ControlSignalStateMachine {
 
     if (this._controlStartTime && (this._lastControlSeen - this._controlStartTime) > this.options.signalHoldTime) {
       if (!this._controlSet) {
-        console.log('control set');
+        log.info('Control Set');
       }
       this._controlSet = true;
     } else if (this._controlSet) {
@@ -54,7 +55,7 @@ class ControlSignalStateMachine {
       // Check if we've timed out
       if ((time() -  this._lastControlSeen) > this.options.signalTimeout) {
         this._controlSet = false;
-        console.log('control timed-out');
+        log.info('Control timed-out');
       }
     }
     return this._controlSet;
@@ -85,8 +86,7 @@ class MotionController {
     this.activeHands = {};
     var self = this;
     beacon.register(beacon.events.config, function(data) {
-      console.log('Updating configuration');
-      console.log(data.data);
+      log.info('Updating configuration: %j', data.data);
       _.assign(self.options, data.data);
     });
   }
