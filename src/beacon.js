@@ -18,6 +18,9 @@ var wsServer = new WebSocketServer({
   autoAcceptConnections: false
 });
 
+/**
+ * A list of connected peers on the web-socket
+ */
 var peerList = [];
 
 const EVENT_NAMES = {
@@ -25,12 +28,18 @@ const EVENT_NAMES = {
   droneSync: 'drone-sync'
 };
 
+/**
+ * A mapping of event names to the callbacks registered to listen for them.
+ */
 var registrations = {};
 
 wsServer.on('request', function(request) {
   var connection = request.accept(null, request.origin);
   peerList.push(connection);
 
+  /**
+   * Every time we get a message, parse it, and check to see if it's for an event that we care about
+   */
   connection.on('message', function(message) {
     if (message.type === 'utf8') {
       var message = JSON.parse(message.utf8Data);
@@ -53,6 +62,10 @@ wsServer.on('request', function(request) {
   });
 });
 
+/**
+ * Publish the given event to the network
+ * @param data - The event to publish
+ */
 function publish(data) {
   _.each(peerList, function(peerConnection) {
     if (peerConnection.connected) {
@@ -61,6 +74,11 @@ function publish(data) {
   });
 }
 
+/**
+ * Register a listener for a specific event type
+ * @param event_name - The event to listen for. One of EVENT_NAMES
+ * @param callback - a function that get's called with the event data when one is published.
+ */
 function register(event_name, callback) {
   if (_.values(EVENT_NAMES).indexOf(event_name) === -1) {
     console.log('Unknown event: ' + event_name);
