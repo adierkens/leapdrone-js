@@ -3,6 +3,7 @@ var _ = require('lodash');
 var Leap = require('leapjs');
 var constants = require('./constants');
 var fistThreshold = .2;
+const log = require('./log');
 
 /**
  * The boundaries of the effective range of the leap motion
@@ -52,7 +53,7 @@ const banked = {
     avgDeltaX = avgDeltaX/hand.fingers.length;
     avgDeltaY = avgDeltaY/hand.fingers.length;
 
-    return -Math.atan(avgDeltaY/avgDeltaX);
+    return Math.min(Math.PI/2, Math.max(-Math.PI/2, -2 * Math.atan(avgDeltaY/avgDeltaX)));
   },
   pitch: function(hand) {
     var palmY = hand.palmPosition[1];
@@ -70,10 +71,32 @@ const banked = {
       avgAngle += Math.atan(deltaY/deltaZ);
     });
 
-    return -avgAngle / hand.fingers.length;
+    var angle = 2 * (-avgAngle / hand.fingers.length);
+    return Math.min(Math.PI/2, Math.max(-Math.PI/2, angle));
   },
   yaw: function(hand) {
-    return 0;
+    var shouldCalc = true;
+    var index = hand.indexFinger;
+
+    _.each(hand.fingers, function(finger) {
+      if (finger.extended && finger !== index) {
+        log.info('Finger: %d is extended', finger.type);
+        shouldCalc = false;
+      }
+    });
+   
+    log.info('Thumb is extended: %b', hand.thumb.extended);
+
+    if (!shouldCalc || !index.extended) {
+      return 0;
+    }
+
+    var proximalBone = index.proximal;
+    var distalBone = index.distal;
+
+    var zDiff = proximalBone.center()[0] - distalBone.center()[0];
+    var angle = calculateAngleFromRange(zDiff, -40, 40);
+    return angle;
   },
   throttle: function(hand) {
     var palmHeight = hand.palmPosition[1];
@@ -93,7 +116,9 @@ const translational = {
     var palmZ = hand.palmPosition[2];
     return calculateAngleFromRange(palmZ, LEAP_BOUNDARIES.z.min, LEAP_BOUNDARIES.z.max);
   },
-  yaw: banked.yaw,
+  yaw: function(hand) {
+    return 0;
+  },
   throttle: banked.throttle
 };
 

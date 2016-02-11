@@ -11,7 +11,7 @@ var defaultMotionOptions = {
   onHandLost: function(side){},
   newPositionEventName: 'newPosition',
   lostHandEventName: 'handLost',
-  rollingAverageCount: 5, // Set to 0 or false to not use the rollingAverage
+  rollingAverageCount: 1, // Set to 0 or false to not use the rollingAverage
 };
 
 var defaultControlOptions = {
@@ -113,6 +113,13 @@ class MotionController {
     _.each(constants.directions, function(dir) {
       position[dir] = helper[self.options.controller][dir](hand);
     });
+
+    log.info('Position: %j', position);
+
+    if (position.yaw > 0.0001 || position.yaw < -0.001) {
+      position.roll = 0;
+      position.pitch = 0;
+    }
 
     position.metaData = {
       controller: this.options.controller
