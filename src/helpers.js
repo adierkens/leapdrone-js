@@ -82,7 +82,7 @@ const banked = {
     var angle = (2.5 * options.sensitivity.pitch) * (-avgAngle / hand.fingers.length);
     return normalizeAngle(angle);
   },
-  yaw: function(hand) {
+  yaw: function(hand, options) {
     var shouldCalc = true;
     var index = hand.indexFinger;
 
@@ -100,7 +100,7 @@ const banked = {
     var distalBone = index.distal;
 
     var zDiff = proximalBone.center()[0] - distalBone.center()[0];
-    var angle = calculateAngleFromRange(zDiff, -40, 40);
+    var angle = calculateAngleFromRange(zDiff * (2 * options.sensitivity.yaw), -40, 40);
     return angle;
   },
   throttle: function(hand) {
