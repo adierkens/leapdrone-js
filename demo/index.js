@@ -132,6 +132,8 @@ function init3DModel() {
       QuadScene.mesh.rotation.x = currentPosition.pitch;
       QuadScene.mesh.rotation.y = Math.PI/2 + currentPosition.roll;
       QuadScene.mesh.position.x = currentPosition.throttle * 50;
+      QuadScene.mesh.rotation.z = currentPosition.yaw;
+
       QuadScene.camera.lookAt(QuadScene.scene.position);
       QuadScene.renderer.render(QuadScene.scene, QuadScene.camera);
     }
