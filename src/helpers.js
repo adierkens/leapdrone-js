@@ -194,7 +194,7 @@ module.exports = {
     /**
      * If there's a yaw - ignore the roll and pitch of the hand
      */
-    if (yaw > 0.001 && yaw > -0.001) {
+    if (yaw < 0.001 && yaw > -0.001) {
       roll = banked.roll(hand, options);
       pitch = banked.pitch(hand, options);
     }
