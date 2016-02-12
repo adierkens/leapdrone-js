@@ -14,3 +14,29 @@
 #graph-view > * {
     padding-bottom: 50px;
 }
+
+.slider > .tooltip {
+    visibility: hidden;
+}
+
+.slider > .tooltip.in {
+    visibility: visible;
+}
+
+.slider.slider-horizontal {
+    background: white;
+}
+
+.slider .slider-handle {
+    background: rgba(0, 150, 136, 0.9);
+}
+
+.sensitivity-slider {
+    margin-bottom: 20px;
+}
+
+.sensitivity-label {
+    display: table-cell;
+    text-align: center;
+    padding-right: 10px;
+}

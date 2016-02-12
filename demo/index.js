@@ -26,6 +26,16 @@ var GoogleChart = {
   }
 };
 
+var sensitivitySlider = {
+  settings: {
+    min: 0,
+    max: 1,
+    value: 0.5,
+    step: 0.1
+  },
+  lastMasterValue: 0.5
+};
+
 var QuadScene = {};
 var websocket;
 
@@ -74,10 +84,16 @@ function onMessage(event) {
   if (eventData.event == 'position') {
     currentPosition = eventData.data;
     updateChart();
-    if (eventData.data.metaData && eventData.data.metaData.controller) {
-      $('#controller-type-select option').each(function() {
-        this.selected = eventData.data.metaData.controller == this.value;
-      });
+    if (eventData.data.metaData) {
+      var metaData = eventData.data.metaData;
+      if (metaData.controller) {
+        $('#controller-type-select option').each(function () {
+          this.selected = eventData.data.metaData.controller == this.value;
+        });
+      }
+      if (metaData.sensitivity) {
+        setSensitivity(metaData.sensitivity);
+      }
     }
   }
 }
@@ -149,6 +165,45 @@ function setConfiguration(config) {
   websocket.send(JSON.stringify(eventData));
 }
 
+function setSensitivity(sensitivity) {
+  $.each(['roll', 'pitch', 'yaw', 'throttle'], function() {
+    var prevValue = sensitivitySlider[this].slider('getValue');
+    if (prevValue !== sensitivity[this]) {
+      sensitivitySlider[this].slider('setValue', sensitivity[this]);
+    }
+  });
+}
+
+var sendSensitivityConfig = _.debounce(function() {
+  var config = {
+    sensitivity: {
+      roll: sensitivitySlider.roll.slider('getValue'),
+      pitch: sensitivitySlider.pitch.slider('getValue'),
+      yaw: sensitivitySlider.yaw.slider('getValue'),
+      throttle: sensitivitySlider.yaw.slider('getValue')
+    }
+  };
+  setConfiguration(config);
+}, 500);
+
+function onSlide() {
+  var direction = this.id.split('-')[0];
+
+  if (direction === 'master') {
+    var diff = this.value - sensitivitySlider.lastMasterValue;
+    if (diff !== 0) {
+      sensitivitySlider.roll.slider('setValue', sensitivitySlider.roll.slider('getValue') + diff);
+      sensitivitySlider.pitch.slider('setValue', sensitivitySlider.pitch.slider('getValue') + diff);
+      sensitivitySlider.yaw.slider('setValue', sensitivitySlider.yaw.slider('getValue') + diff);
+      sensitivitySlider.throttle.slider('setValue', sensitivitySlider.throttle.slider('getValue') + diff);
+    }
+    sendSensitivityConfig();
+    sensitivitySlider.lastMasterValue = this.value;
+  } else {
+    sendSensitivityConfig();
+  }
+}
+
 function init() {
   console.log("Initializing");
   initGoogleChart();
@@ -179,6 +234,22 @@ function init() {
 
     websocket.send(JSON.stringify(droneSyncPayload));
   });
+
+  sensitivitySlider.master = $('#master-sensitivity').slider(sensitivitySlider.settings);
+  sensitivitySlider.master.on('slide', onSlide);
+
+  sensitivitySlider.pitch = $('#pitch-sensitivity').slider(sensitivitySlider.settings);
+  sensitivitySlider.pitch.on('slide', onSlide);
+
+  sensitivitySlider.roll = $('#roll-sensitivity').slider(sensitivitySlider.settings);
+  sensitivitySlider.roll.on('slide', onSlide);
+
+  sensitivitySlider.yaw = $('#yaw-sensitivity').slider(sensitivitySlider.settings);
+  sensitivitySlider.yaw.on('slide', onSlide);
+
+  sensitivitySlider.throttle = $('#throttle-sensitivity').slider(sensitivitySlider.settings);
+  sensitivitySlider.throttle.on('slide', onSlide);
+
 }
 
 window.onload = init;
