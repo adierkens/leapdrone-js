@@ -47,13 +47,14 @@ The callback when a new drone position is calculated. The parameter is an object
     roll: 0,
     pitch: 0,
     yaw: 0,
+    throttle: 0,
     metaData: {
         controller: 'banked'
     }
 }
 ```
 
-`roll`, `pitch`, and `yaw` are all doubles between [ -PI/2, PI/2 ] representing the X, Y, Z angles the drone should take.
+`roll`, `pitch`, `yaw`, and `throttle` are all doubles between [ -PI/2, PI/2 ] representing the X, Y, Z angles the drone should take.
 
 #### options.rollingAverageCount
 Type: `Integer`
@@ -63,6 +64,19 @@ In order to smooth out the position calculations, a rolling average is used in t
 
 To disable the rolling average, set this to `false`, `0`, or `1`
  
+### options.sensitivity
+Type: `Object`
+Default value:
+```
+{
+    roll: 0.5,
+    pitch: 0.5,
+    yaw: 0.5,
+    throttle: 0.5
+}
+```
+
+Each value of a number between `0` and `1` representing how sensitive the controls for each direction should be
 
 # TODO
  - ~~Style the demo page~~ 
@@ -73,4 +87,5 @@ To disable the rolling average, set this to `false`, `0`, or `1`
  - ~~Handle the syncing/registration for connecting to a drone through RF~~
  - Add control signals
  - Add multiple drone support in the demo page
+ - ~~Add sensitivity~~
 

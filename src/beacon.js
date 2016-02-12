@@ -67,6 +67,7 @@ wsServer.on('request', function(request) {
  * @param data - The event to publish
  */
 function publish(data) {
+  log.debug('Publishing beacon: %j', data);
   _.each(peerList, function(peerConnection) {
     if (peerConnection.connected) {
       peerConnection.sendUTF(JSON.stringify(data));

@@ -11,7 +11,13 @@ var defaultMotionOptions = {
   onHandLost: function(side){},
   newPositionEventName: 'newPosition',
   lostHandEventName: 'handLost',
-  rollingAverageCount: 1, // Set to 0 or false to not use the rollingAverage
+  rollingAverageCount: 1, // Set to 0 or false to not use the rollingAverage,
+  sensitivity: {
+    roll: 0.5,
+    pitch: 0.5,
+    yaw: 0.5,
+    throttle: 0.5
+  }
 };
 
 var defaultControlOptions = {
@@ -108,23 +114,11 @@ class MotionController {
    * @returns {Object} - the new position
    */
   calculateNewPosition(hand) {
-    var position = {};
-    var self = this;
-    _.each(constants.directions, function(dir) {
-      position[dir] = helper[self.options.controller][dir](hand);
-    });
-
-    log.info('Position: %j', position);
-
-    if (position.yaw > 0.0001 || position.yaw < -0.001) {
-      position.roll = 0;
-      position.pitch = 0;
-    }
-
+    var position = helper[this.options.controller](hand, this.options);
     position.metaData = {
-      controller: this.options.controller
+      controller: this.options.controller,
+      sensitivity: this.options.sensitivity
     };
-
     return position;
   }
 

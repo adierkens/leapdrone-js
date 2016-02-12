@@ -7,9 +7,11 @@
         <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.0.0/lodash.min.js"></script>
         <script type="text/javascript" src="index.js"></script>
         <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/6.0.16/bootstrap-slider.min.js"></script>
 
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
         <link rel="stylesheet" href="http://fezvrasta.github.io/bootstrap-material-design/dist/css/bootstrap-material-design.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/6.0.16/css/bootstrap-slider.min.css">
         <link rel="stylesheet" href="style.css"/>
     </head>
     <body>
@@ -19,21 +21,21 @@
                 <div class="col-sm-3 menu">
                     <ul class="nav nav-pills nav-stacked">
                         <li class="active">
-                            <a href="#graph-view" data-toggle="tab">Graphs</a>
+                            <a href="#config-view" data-toggle="tab">Configuration</a>
                         </li>
                         <li>
-                            <a href="#config-view" data-toggle="tab">Configuration</a>
+                            <a href="#graph-view" data-toggle="tab">Graphs</a>
                         </li>
                     </ul>
                 </div>
                 <div class="col-sm-9">
                     <div class="row container-fluid main">
-                        <div class="col-sm-5 tab-content">
-                            <div class="tab-pane fade active in" id="graph-view">
+                        <div class="col-sm-12 tab-content">
+                            <div class="tab-pane fade in" id="graph-view">
                                 <div id="quad_scene"></div>
                                 <div id="motion_chart"></div>
                             </div>
-                            <div class="tab-pane fade" id="config-view">
+                            <div class="tab-pane fade in active well" id="config-view">
                                 <div class="dropdown">
                                     <label for="controller-type-select">Motion Controller Type</label>
                                     <select id="controller-type-select" class="form-control">
@@ -50,6 +52,55 @@
                                 </div>
                                 <div class="drone-sync">
                                     <button class="btn btn-primary" id="drone-sync-button">Sync</button>
+                                </div>
+                                <div id="sensitivity-settings">
+                                    <div class="sensitivity-sliders">
+                                        <div class="row sensitivity-slider">
+                                            <div class="col-sm-3">
+                                                <b class="sensitivity-label">Master</b>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="master-sensitivity">
+                                            </div>
+                                        </div>
+
+                                        <div class="row sensitivity-slider">
+                                            <div class="col-sm-3">
+                                                <b class="sensitivity-label">Pitch</b>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="pitch-sensitivity">
+                                            </div>
+                                        </div>
+
+                                        <div class="row sensitivity-slider">
+                                            <div class="col-sm-3">
+                                                <b class="sensitivity-label">Roll</b>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="roll-sensitivity">
+                                            </div>
+                                        </div>
+
+                                        <div class="row sensitivity-slider">
+                                            <div class="col-sm-3">
+                                                <b class="sensitivity-label">Yaw</b>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="yaw-sensitivity">
+                                            </div>
+                                        </div>
+
+                                        <div class="row sensitivity-slider">
+                                            <div class="col-sm-3">
+                                                <b class="sensitivity-label">Throttle</b>
+                                            </div>
+                                            <div class="col-sm-9">
+                                                <input type="text" id="throttle-sensitivity">
+                                            </div>
+                                        </div>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>

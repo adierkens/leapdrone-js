@@ -25,10 +25,18 @@ const LEAP_BOUNDARIES = {
 };
 
 /**
+ * Takes the given angle and makes sure it's in the range of [-PI/2,PI/2]
+ * @param angle
+ */
+function normalizeAngle(angle) {
+  return Math.min(Math.PI/2, Math.max(-Math.PI/2, angle));
+}
+
+/**
  * The functions to calculate roll, pitch, yaw, and throttle using the banked hand motions
  */
 const banked = {
-  roll: function(hand) {
+  roll: function(hand, options) {
     var avgDeltaX = 0;
     var avgDeltaY = 0;
 
@@ -53,9 +61,9 @@ const banked = {
     avgDeltaX = avgDeltaX/hand.fingers.length;
     avgDeltaY = avgDeltaY/hand.fingers.length;
 
-    return Math.min(Math.PI/2, Math.max(-Math.PI/2, -2 * Math.atan(avgDeltaY/avgDeltaX)));
+    return normalizeAngle(-(2.5 * options.sensitivity.roll) * Math.atan(avgDeltaY/avgDeltaX));
   },
-  pitch: function(hand) {
+  pitch: function(hand, options) {
     var palmY = hand.palmPosition[1];
     var palmZ = hand.palmPosition[2];
 
@@ -71,21 +79,18 @@ const banked = {
       avgAngle += Math.atan(deltaY/deltaZ);
     });
 
-    var angle = 2 * (-avgAngle / hand.fingers.length);
-    return Math.min(Math.PI/2, Math.max(-Math.PI/2, angle));
+    var angle = (2.5 * options.sensitivity.pitch) * (-avgAngle / hand.fingers.length);
+    return normalizeAngle(angle);
   },
-  yaw: function(hand) {
+  yaw: function(hand, options) {
     var shouldCalc = true;
     var index = hand.indexFinger;
 
     _.each(hand.fingers, function(finger) {
       if (finger.extended && finger !== index) {
-        log.info('Finger: %d is extended', finger.type);
         shouldCalc = false;
       }
     });
-   
-    log.info('Thumb is extended: %b', hand.thumb.extended);
 
     if (!shouldCalc || !index.extended) {
       return 0;
@@ -95,7 +100,7 @@ const banked = {
     var distalBone = index.distal;
 
     var zDiff = proximalBone.center()[0] - distalBone.center()[0];
-    var angle = calculateAngleFromRange(zDiff, -40, 40);
+    var angle = calculateAngleFromRange(zDiff * (2 * options.sensitivity.yaw), -40, 40);
     return angle;
   },
   throttle: function(hand) {
@@ -180,8 +185,35 @@ function calculateAngleFromRange(distance, min, max) {
 }
 
 module.exports = {
-  banked: banked,
-  translational: translational,
+  banked: function(hand, options) {
+    var yaw = banked.yaw(hand, options);
+    var throttle = banked.throttle(hand, options);
+    var roll = 0;
+    var pitch = 0;
+
+    /**
+     * If there's a yaw - ignore the roll and pitch of the hand
+     */
+    if (yaw > 0.001 && yaw > -0.001) {
+      roll = banked.roll(hand, options);
+      pitch = banked.pitch(hand, options);
+    }
+
+    return {
+      roll: roll,
+      pitch: pitch,
+      yaw: yaw,
+      throttle: throttle
+    };
+  },
+  translational: function(hand) {
+    return {
+      roll: translational.roll(hand),
+      pitch: translational.pitch(hand),
+      yaw: translational.yaw(hand),
+      throttle: translational.throttle(hand)
+    };
+  },
   isFist: isFist,
   average: average
 };
