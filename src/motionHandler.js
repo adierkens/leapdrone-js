@@ -5,6 +5,7 @@ var moment = require('moment');
 var beacon = require('./beacon');
 var constants = require('./constants');
 var log = require('./log');
+var hover = require('./hover');
 
 var defaultMotionOptions = {
   onNewPosition: function(){},
@@ -17,6 +18,11 @@ var defaultMotionOptions = {
     pitch: 0.5,
     yaw: 0.5,
     throttle: 0.5
+  },
+  pid: {
+    P: 1,
+    I: 0,
+    D: 0
   }
 };
 
@@ -70,6 +76,7 @@ class MotionController {
    */
   onHand(hand, sender) {
     if (hand.type === "right") {
+      hover.stop();
       // Right hand is the directional controller hand for the drone
       var newPosition = this.calculateNewPosition(hand);
       this.prevPositions.push(newPosition);
@@ -109,10 +116,16 @@ class MotionController {
         self.options.onHandLost(hand.type);
 
         if (hand.type === "right") {
+          /**
+          
           sender.emit(self.options.newPositionEventName, constants.defaultPosition);
           var position = constants.defaultPosition;
           position.quad = self.quadNumber;
           self.options.onNewPosition(constants.defaultPosition);
+          
+          // **/
+          
+          hover.start();
         }
       }
 

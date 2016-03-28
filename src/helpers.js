@@ -217,6 +217,22 @@ function quadSelector(hand) {
   return extendedFingerCount - 1;
 }
 
+  function positionDifference(x, y) {
+  return {
+    x: x.x - y.x,
+    y: x.y - y.y,
+    z: x.z - y.z
+  };
+}
+
+function positionSum(x, y) {
+  return {
+    x: x.x + y.x,
+    y: x.y + y.y,
+    z: x.z + y.z
+  };
+}
+
 module.exports = {
   banked: function(hand, options) {
     var yaw = banked.yaw(hand, options);
@@ -249,5 +265,7 @@ module.exports = {
   },
   isFist: isFist,
   average: average,
-  quadSelector: quadSelector
+  quadSelector: quadSelector,
+  positionDifference: positionDifference,
+  positionSum: positionSum
 };

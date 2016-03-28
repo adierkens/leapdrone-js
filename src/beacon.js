@@ -26,7 +26,8 @@ var peerList = [];
 
 const EVENT_NAMES = {
   config: 'config',
-  droneSync: 'drone-sync'
+  droneSync: 'drone-sync',
+  position: 'position'
 };
 
 /**

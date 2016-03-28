@@ -26,6 +26,8 @@ const PWM_CHANNEL_MAP = {
   yaw: 3
 };
 
+var lastPositionUpdate;
+
 /**
  * The time (ms) to wait between sync transitions
  */
@@ -173,7 +175,13 @@ var droneControl = {
       var dutyCycle = dutyCycleFromAngle(position_update[direction]);
       setDutyCycle(normalizedPin(position_update.quad, channel), dutyCycle);
     });
+    lastPositionUpdate = position_update;
+  },
+
+  currentPosition: function() {
+    return lastPositionUpdate;
   }
+
 };
 
 /**
