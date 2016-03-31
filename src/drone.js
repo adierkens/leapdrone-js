@@ -53,8 +53,10 @@ try {
     /**
      * Set all the initial PWM signals
      */
-    _.forIn(INITIAL_DUTY_CYCLE, function(dutyCycle, direction) {
-      setDutyCycle(PWM_CHANNEL_MAP[direction], dutyCycle);
+    _.each([0, 1, 2, 3], function(quadNumber) { 
+      _.forIn(INITIAL_DUTY_CYCLE, function(dutyCycle, direction) {
+        setDutyCycle(normalizedPin(quadNumber, PWM_CHANNEL_MAP[direction]), dutyCycle);
+      });
     });
   });
 
