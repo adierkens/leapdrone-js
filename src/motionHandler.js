@@ -110,6 +110,8 @@ class MotionController {
 
         if (hand.type === "right") {
           sender.emit(self.options.newPositionEventName, constants.defaultPosition);
+          var position = constants.defaultPosition;
+          position.quad = self.quadNumber;
           self.options.onNewPosition(constants.defaultPosition);
         }
       }
