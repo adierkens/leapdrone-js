@@ -20,66 +20,6 @@ var defaultMotionOptions = {
   }
 };
 
-var defaultControlOptions = {
-  onNewControl: function(){},
-  controlSetEventName: 'controlSet',
-  signalHoldTime: 3,
-  signalTimeout: 5,
-  isSetSignal: helper.isFist
-};
-
-function time() {
-  return moment().unix();
-}
-
-class ControlSignalStateMachine {
-  constructor(options) {
-    this.options = _.assign(defaultControlOptions, options);
-    this._controlSet = false;
-    this._controlStartTime = 0;
-    this._lastControlSeen = 0;
-  }
-
-  _checkControlSet(hand) {
-    if (this.options.isSetSignal(hand)) {
-      var curTime = time();
-      if (!this._controlStartTime) {
-        this._controlStartTime = curTime;
-      }
-      this._lastControlSeen = curTime;
-    } else {
-      this._controlStartTime = 0;
-    }
-
-    if (this._controlStartTime && (this._lastControlSeen - this._controlStartTime) > this.options.signalHoldTime) {
-      if (!this._controlSet) {
-        log.info('Control Set');
-      }
-      this._controlSet = true;
-    } else if (this._controlSet) {
-      // We didn't see a controlSignal
-      // Check if we've timed out
-      if ((time() -  this._lastControlSeen) > this.options.signalTimeout) {
-        this._controlSet = false;
-        log.info('Control timed-out');
-      }
-    }
-    return this._controlSet;
-  }
-
-  onHand(hand, sender) {
-    if (hand.type === "right") {
-      // Ignore any right hand signals for now
-      return;
-    }
-
-    if (this._checkControlSet(hand)) {
-      sender.emit(this.options.controlSetEventName);
-    }
-  }
-}
-
-
 class MotionController {
 
   constructor(options) {
@@ -87,9 +27,9 @@ class MotionController {
       options.rollingAverageCount = 1;
     }
     this.options = _.assign(defaultMotionOptions, options);
-    this.controlStateMachine = new ControlSignalStateMachine();
     this.prevPositions = [];
     this.activeHands = {};
+    this.quadNumber = 0;
     var self = this;
     beacon.register(beacon.events.config, function(data) {
       log.info('Updating configuration: %j', data.data);
@@ -135,11 +75,15 @@ class MotionController {
       this.prevPositions.push(newPosition);
       var currentPosition = this.rollingAverage();
       currentPosition.metaData = newPosition.metaData;
+      currentPosition.quad = this.quadNumber;
       sender.emit(this.options.newPositionEventName, currentPosition);
       this.options.onNewPosition(currentPosition);
     } else {
-      // Left hand is used for mode settings
-      this.controlStateMachine.onHand(hand, sender);
+      var quadNumber = helper.quadSelector(hand);
+      if (quadNumber !== this.quadNumber) {
+        log.info('Switched to control quad: ' + quadNumber);
+        this.quadNumber = quadNumber;
+      }
     }
   }
 
@@ -166,6 +110,8 @@ class MotionController {
 
         if (hand.type === "right") {
           sender.emit(self.options.newPositionEventName, constants.defaultPosition);
+          var position = constants.defaultPosition;
+          position.quad = self.quadNumber;
           self.options.onNewPosition(constants.defaultPosition);
         }
       }
