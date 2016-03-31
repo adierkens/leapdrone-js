@@ -24,6 +24,15 @@ const LEAP_BOUNDARIES = {
   }
 };
 
+
+const FINGER_TYPE = {
+    THUMB: 0,
+    INDEX: 1,
+    MIDDLE: 2,
+    RING: 3, 
+    PINKY: 4
+}
+
 /**
  * Takes the given angle and makes sure it's in the range of [-PI/2,PI/2]
  * @param angle
@@ -184,6 +193,30 @@ function calculateAngleFromRange(distance, min, max) {
   return (Math.PI * distancePercent) - (Math.PI / 2.0);
 }
 
+
+/**
+ * Finds the correct quadcopter to control based on the given hand
+ * @param hand - The LeapJS hand object
+ * @returs {number} - The index of the new quad to control. Defaults to 0
+ */
+function quadSelector(hand) {
+  var extendedFingerCount = 0;
+  _.each(hand.fingers, function(finger) {
+    if (finger.type === FINGER_TYPE.INDEX ||
+        finger.type === FINGER_TYPE.MIDDLE ||
+        finger.type === FINGER_TYPE.RING) {
+    
+      if (finger.extended) {
+        extendedFingerCount += 1;
+      }
+
+    }
+  });
+
+  extendedFingerCount = Math.max(extendedFingerCount, 1);
+  return extendedFingerCount - 1;
+}
+
 module.exports = {
   banked: function(hand, options) {
     var yaw = banked.yaw(hand, options);
@@ -215,5 +248,6 @@ module.exports = {
     };
   },
   isFist: isFist,
-  average: average
+  average: average,
+  quadSelector: quadSelector
 };
