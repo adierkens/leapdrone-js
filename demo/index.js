@@ -227,10 +227,11 @@ function init() {
   });
 
   $('#drone-sync-button').click(function() {
+
     const droneSyncPayload = {
       event: 'drone-sync',
       data: {
-        index: 0
+        quad: $('#drone-sync-quad-number').val() -  1
       }
     };
 

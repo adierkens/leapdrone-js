@@ -93,12 +93,23 @@ function setDutyCycle(channel, dutyCycle) {
   }
 }
 
+function normalizedPin(quadNumber, pin) {
+    
+    if (arguments.length === 1)  {
+        pin = quadNumber;
+        quadNumber = 0;
+    }
+
+    return (quadNumber * 4) + pin;
+}
+
 /**
  * Syncs the drone with the controller
  * The throttle needs to go from 0-3.3v-0
  * All other axises are 1.65
  */
-function sync() {
+function sync(quadNum) {
+  quadNum = quadNum || 0;
   if (!pwm) {
     Logger.warn('PWM not supported. Ignoring sync..');
     return;
@@ -109,9 +120,9 @@ function sync() {
    */
   _.forIn(PWM_CHANNEL_MAP, function(channel, direction) {
     if (direction === 'throttle') {
-      zeroChannel(channel);
+      zeroChannel(normalizedPin(quadNum, channel));
     } else {
-      pwm.setDutyCycle(channel, 0.5);
+      pwm.setDutyCycle(normalizedPin(quadNum, channel), 0.5);
     }
   });
 
@@ -119,13 +130,13 @@ function sync() {
    * After QUAD_SYNC_DELAY ms, set the throttle to 100%
    */
   setTimeout(function() {
-    pwm.setDutyCycle(PWM_CHANNEL_MAP.throttle, 1);
+    pwm.setDutyCycle(normalizedPin(quadNum, PWM_CHANNEL_MAP.throttle), 1);
 
     /**
      * After another QUAD_SYNC_DELAY ms, set the throttle back down to 0
      */
     setTimeout(function() {
-      zeroChannel(PWM_CHANNEL_MAP.throttle);
+      zeroChannel(normalizedPin(quadNum, PWM_CHANNEL_MAP.throttle));
       Logger.info('Finished Drone Sync');
     }, QUAD_SYNC_DELAY);
   }, QUAD_SYNC_DELAY);
@@ -135,8 +146,9 @@ function sync() {
  * Handle the sync event for a drone
  */
 beacon.register(beacon.events.droneSync, function(ev) {
-  Logger.info('Starting Drone Sync');
-  sync();
+  var quadNum = ev.data.quad || 0;
+  Logger.info('Starting Drone Sync for quad: ' + quadNum);
+  sync(quadNum);
 });
 
 /**
@@ -154,9 +166,10 @@ var droneControl = {
    * Takes a position update and sends the appropriate GPIO signal
    */
   update: function(position_update) {
+    position_update.quad = position_update.quad || 0;
     _.forIn(PWM_CHANNEL_MAP, function(channel, direction) {
       var dutyCycle = dutyCycleFromAngle(position_update[direction]);
-      setDutyCycle(channel, dutyCycle);
+      setDutyCycle(normalizedPin(position_update.quad, channel), dutyCycle);
     });
   }
 };

@@ -135,6 +135,7 @@ class MotionController {
       this.prevPositions.push(newPosition);
       var currentPosition = this.rollingAverage();
       currentPosition.metaData = newPosition.metaData;
+      currentPosition.quad = 0;
       sender.emit(this.options.newPositionEventName, currentPosition);
       this.options.onNewPosition(currentPosition);
     } else {
