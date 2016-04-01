@@ -45,11 +45,11 @@ beacon.register(beacon.events.position, function(event) {
   var throttle = (P * proportional.y) + (I * integral.y) + (D * derivative.y);
 
   var newPosition = drone.currentPosition();
-  log.info('Throttle difference: %s', throttle);
-
   newPosition.throttle += throttle;
 
-  drone.update(newPosition);
+  log.info('Throttle: %s', newPosition.throttle);
+
+  // drone.update(newPosition);
 });
 
 var startHover = function() {
