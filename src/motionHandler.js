@@ -18,11 +18,6 @@ var defaultMotionOptions = {
     pitch: 0.5,
     yaw: 0.5,
     throttle: 0.5
-  },
-  pid: {
-    P: 1,
-    I: 0,
-    D: 0
   }
 };
 
@@ -125,7 +120,7 @@ class MotionController {
           
           // **/
           
-          hover.start();
+          hover.start(self.options.onNewPosition);
         }
       }
 

@@ -86,13 +86,21 @@ function onMessage(event) {
     updateChart();
     if (eventData.data.metaData) {
       var metaData = eventData.data.metaData;
+
       if (metaData.controller) {
         $('#controller-type-select option').each(function () {
           this.selected = eventData.data.metaData.controller == this.value;
         });
       }
+
       if (metaData.sensitivity) {
         setSensitivity(metaData.sensitivity);
+      }
+
+      if (metaData.pid) {
+        _.forEach(metaData.pid, function(value, key) {
+          $('#' + key + '-setting').val(value);
+        });
       }
     }
   }
@@ -206,6 +214,22 @@ function onSlide() {
   }
 }
 
+function onPID() {
+  
+  var data = {};
+
+  _.each(['P', 'I', 'D'], function(control) {
+    var val = $('#' + control + '-setting').val();
+    if (val !== "") {
+      data[control] = parseFloat(val, 10);
+    }
+  });
+
+  setConfiguration({
+    pid: data
+  });
+}
+
 function init() {
   console.log("Initializing");
   initGoogleChart();
@@ -253,6 +277,9 @@ function init() {
   sensitivitySlider.throttle = $('#throttle-sensitivity').slider(sensitivitySlider.settings);
   sensitivitySlider.throttle.on('slide', onSlide);
 
+  _.each(['P', 'I', 'D'], function(control) {
+    $('#' + control + '-setting').on('change', onPID);
+  });
 }
 
 window.onload = init;

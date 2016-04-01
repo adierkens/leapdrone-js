@@ -90,7 +90,7 @@ function register(event_name, callback) {
   if (!registrations[event_name]) {
     registrations[event_name] = [callback];
   } else {
-    registrations.push(callback);
+    registrations[event_name].push(callback);
   }
 }
 
