@@ -24,6 +24,7 @@ var lastQuadPosition = {
 };
 
 beacon.register(beacon.events.position, function(event) {
+  log.info(event);
   if (!shouldControlQuad) {
     return;
   }
