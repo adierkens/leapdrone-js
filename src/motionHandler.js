@@ -30,6 +30,7 @@ class MotionController {
     this.prevPositions = [];
     this.activeHands = {};
     this.quadNumber = 0;
+    this.allowQuadSwitch = true;
     var self = this;
     beacon.register(beacon.events.config, function(data) {
       log.info('Updating configuration: %j', data.data);
@@ -80,9 +81,12 @@ class MotionController {
       this.options.onNewPosition(currentPosition);
     } else {
       var quadNumber = helper.quadSelector(hand);
-      if (quadNumber !== this.quadNumber) {
-        log.info('Switched to control quad: ' + quadNumber);
-        this.quadNumber = quadNumber;
+      if (this.allowQuadSwitch) {
+        if (quadNumber !== this.quadNumber) {
+          log.info('Switched to control quad: ' + (quadNumber + 1));
+          this.quadNumber = quadNumber;
+          this.allowQuadSwitch = false;
+        }
       }
     }
   }
@@ -113,6 +117,9 @@ class MotionController {
           var position = constants.defaultPosition;
           position.quad = self.quadNumber;
           self.options.onNewPosition(constants.defaultPosition);
+        } else {
+          // Lost the left hand
+          self.allowQuadSwitch = true;
         }
       }
 
