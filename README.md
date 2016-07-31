@@ -2,6 +2,8 @@
 # leapdrone
 > A javascript version of the leapdrone project
 
+[![Quadcopter Control via Leap Motion](https://img.youtube.com/vi/v1BoLWgiFu8/0.jpg)](https://www.youtube.com/watch?v=v1BoLWgiFu8)
+
 ## Installation
 
 ``` npm install ```
